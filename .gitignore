@@ -1,0 +1,20 @@
+# Entornos virtuales de Python
+venv/
+ia/venv/
+ia/__pycache__/
+__pycache__/
+
+# Dependencias de Node.js
+bot/node_modules/
+node_modules/
+
+# Archivos de sesión y tokens de WhatsApp
+bot/tokens/
+
+# Variables de entorno y contraseñas (¡SÚPER IMPORTANTE!)
+ia/.env
+.env
+
+# Archivos basura del sistema
+.DS_Store
+Thumbs.db

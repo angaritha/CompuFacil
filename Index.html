@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Presentación Interactiva - CompuFácil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #4d2433; 
+            --primary-light: #6a3246;
+            --bg-color: #f1f5f9;
+            --dark: #0f172a;
+            --gray: #64748b;
+            --white: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
+            overflow: hidden; 
+            background-color: var(--bg-color);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--dark);
+        }
+
+        .scroll-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        .section-wrapper {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            scroll-snap-align: start; 
+            position: relative;
+        }
+
+        .slide-container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .scroll-down {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--primary);
+            font-size: 35px;
+            text-decoration: none;
+            animation: bounce 2s infinite;
+            transition: color 0.3s;
+            z-index: 10;
+        }
+        .scroll-down:hover { color: var(--primary-light); }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+            40% { transform: translateY(-10px) translateX(-50%); }
+            60% { transform: translateY(-5px) translateX(-50%); }
+        }
+
+        /* ENCABEZADOS */
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: var(--white);
+            padding: 25px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 32px; margin-bottom: 5px; }
+        .header p { font-size: 16px; opacity: 0.9; }
+
+        /* CUERPO CENTRAL */
+        .main-content {
+            display: flex;
+            padding: 40px;
+            gap: 40px;
+            align-items: center;
+        }
+
+        /* TARJETA 1 */
+        .left-column {
+            flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center;
+            background: #f8fafc; padding: 30px; border-radius: 20px; border: 4px dashed var(--primary);
+            transition: all 0.3s ease;
+        }
+        .left-column:hover { background: #e2e8f0; border-color: var(--primary-light); }
+        .qr-title { font-size: 22px; color: var(--primary); font-weight: 800; margin-bottom: 15px; }
+        .qr-link { transition: transform 0.4s; display: block; margin-bottom: 10px; }
+        .qr-link:hover { transform: scale(1.08); }
+        .qr-link img { border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); width: 220px; height: 220px; }
+        
+        /* BOTONES GLOBALES */
+        .btn-accion {
+            background: var(--primary); color: var(--white); text-decoration: none; padding: 12px 30px;
+            border-radius: 10px; font-size: 16px; font-weight: 700; display: inline-flex; align-items: center;
+            gap: 10px; transition: all 0.3s ease; justify-content: center; cursor: pointer; border: none;
+        }
+        .btn-accion:hover { background: var(--primary-light); transform: translateY(-4px); box-shadow: 0 8px 20px rgba(77, 36, 51, 0.3); }
+
+        .right-column { flex: 1.2; display: flex; flex-direction: column; gap: 20px; }
+        .step-card {
+            background: #f8fafc; border-left: 8px solid var(--primary); padding: 20px;
+            border-radius: 12px; display: flex; align-items: center; gap: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: all 0.4s; cursor: pointer;
+        }
+        .step-card:hover {
+            transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 30px rgba(77, 36, 51, 0.15);
+            border-left-color: var(--primary-light); background: #ffffff;
+        }
+        .step-icon {
+            width: 60px; height: 60px; background: var(--primary); color: var(--white);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            font-size: 26px; flex-shrink: 0; transition: transform 0.4s ease;
+        }
+        .step-card:hover .step-icon { transform: rotate(-10deg) scale(1.1); background: var(--primary-light); }
+        .step-text h3 { font-size: 18px; color: var(--dark); margin-bottom: 5px; }
+        .step-text p { font-size: 15px; color: var(--gray); }
+        .cmd {
+            background: var(--white); border: 2px solid var(--primary); color: var(--primary);
+            padding: 2px 8px; border-radius: 6px; font-family: monospace; font-weight: 800; transition: all 0.3s;
+        }
+        .step-card:hover .cmd { background: var(--primary); color: var(--white); }
+
+        /* TARJETAS 2 y 3 (INFO DE PROYECTO Y PEDAGOGÍA) */
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; width: 100%; }
+        
+        .info-card {
+            background: #f8fafc; padding: 30px 20px; border-radius: 15px; border-top: 6px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none; display: block; color: inherit; position: relative;
+        }
+        .info-card:hover { 
+            transform: translateY(-5px); 
+            background: #ffffff; 
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+        
+        /* Efecto extra para la tarjeta clickeable */
+        .info-card.clickable-card { cursor: pointer; }
+        .info-card.clickable-card:hover .info-icon { transform: scale(1.1); }
+        .info-icon { font-size: 40px; color: var(--primary); margin-bottom: 15px; transition: transform 0.3s; }
+        .info-card h3 { font-size: 20px; margin-bottom: 12px; color: var(--dark); }
+        .info-card p { font-size: 14px; color: var(--gray); line-height: 1.5; }
+        
+        .badge-link {
+            display: inline-flex; align-items: center; gap: 5px; background: var(--primary-light);
+            color: var(--white); font-size: 11px; padding: 4px 10px; border-radius: 20px;
+            margin-top: 15px; font-weight: 700;
+        }
+
+        /* ESPACIO EN CONSTRUCCIÓN */
+        .placeholder-box {
+            background: #f1f5f9; border: 3px dashed #cbd5e1; border-radius: 15px;
+            padding: 50px 20px; text-align: center; width: 100%;
+        }
+        .placeholder-box i { font-size: 45px; color: #94a3b8; margin-bottom: 15px; }
+        .placeholder-box h3 { color: var(--gray); font-size: 20px; }
+
+        /* PIE DE PÁGINA */
+        .footer {
+            border-top: 2px solid #e2e8f0; padding: 25px 40px; display: flex;
+            flex-direction: column; gap: 15px; background: #ffffff;
+        }
+        .developers-section { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .developers-section span { font-weight: 800; color: var(--dark); font-size: 16px; }
+        .dev-btn {
+            background: var(--white); color: var(--primary); border: 2px solid var(--primary);
+            text-decoration: none; padding: 8px 18px; border-radius: 50px; font-weight: 700;
+            transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;
+        }
+        .dev-btn:hover { background: var(--primary); color: var(--white); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(77, 36, 51, 0.2); }
+        .institucional-quote {
+            font-size: 13px; font-style: italic; font-weight: 700; color: var(--primary);
+            line-height: 1.5; padding-left: 20px; border-left: 4px solid var(--primary);
+        }
+
+        /* ESTILOS DEL MODAL (Ventana Emergente) */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 9999; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(15, 23, 42, 0.85); 
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            max-width: 90%;
+            max-height: 85vh;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: #ffffff;
+            font-size: 45px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .close-btn:hover {
+            color: var(--primary-light);
+        }
+
+        /* ====== ADAPTACIÓN PERFECTA PARA MÓVILES ====== */
+        @media (max-width: 768px) {
+            .section-wrapper { padding: 0; }
+            .slide-container { border-radius: 0; min-height: 100vh; box-shadow: none; justify-content: center; }
+            .header { padding: 20px 25px; flex-direction: column; text-align: center; gap: 10px; }
+            .header h1 { font-size: 26px; }
+            .header p { font-size: 14px; }
+            .main-content { flex-direction: column; padding: 25px; gap: 25px; }
+            .left-column { padding: 20px; width: 100%; border-width: 3px; }
+            .qr-link img { width: 180px; height: 180px; }
+            .qr-title { font-size: 18px; margin-bottom: 10px; }
+            .right-column { width: 100%; gap: 15px; }
+            .step-card { padding: 15px; gap: 15px; border-left-width: 6px; }
+            .step-icon { width: 50px; height: 50px; font-size: 22px; }
+            .step-text h3 { font-size: 16px; }
+            .step-text p { font-size: 13px; }
+            .grid-3 { grid-template-columns: 1fr; gap: 15px; }
+            .info-card { padding: 20px 15px; }
+            .footer { padding: 25px; text-align: center; gap: 20px; }
+            .developers-section { flex-direction: column; gap: 10px; width: 100%; }
+            .developers-section span { display: block; margin-bottom: 5px; }
+            .institucional-quote {
+                padding-left: 0; padding-top: 15px; border-left: none;
+                border-top: 2px solid var(--primary); font-size: 12px;
+            }
+            .close-btn { top: 10px; right: 20px; font-size: 35px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="scroll-container">
+
+    <!-- SECCIÓN 1: INICIO Y ACCESO -->
+    <div id="inicio" class="section-wrapper">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>CompuFácil</h1>
+                    <p>Tu Tutor Virtual de Hardware 24/7</p>
+                </div>
+                <div><i class="fa-solid fa-graduation-cap" style="font-size: 35px; opacity: 0.8;"></i></div>
+            </header>
+
+            <main class="main-content">
+                <div class="left-column">
+                    <div class="qr-title">Ingresa al Chat Aquí</div>
+                    <a href="http://wa.me/+573132376234" target="_blank" class="qr-link" title="Clic para abrir WhatsApp">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=http://wa.me/+573132376234" alt="Código QR WhatsApp">
+                    </a>
+                </div>
+
+                <div class="right-column">
+                    <div class="step-card">
+                        <div class="step-icon"><i class="fa-brands fa-whatsapp"></i></div>
+                        <div class="step-text">
+                            <h3>Paso 1: Interacción Inicial</h3>
+                            <p>Escribe la palabra <span class="cmd">HOLA</span></p>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-icon"><i class="fa-solid fa-brain"></i></div>
+                        <div class="step-text">
+                            <h3>Paso 2: Evaluación Piloto</h3>
+                            <p>Envía la opción <span class="cmd">2</span> en el menú</p>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-icon"><i class="fa-solid fa-robot"></i></div>
+                        <div class="step-text">
+                            <h3>Paso 3: Microaprendizaje</h3>
+                            <p>Responde y recibe feedback</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="footer">
+                <div class="developers-section">
+                    <span>Equipo:</span>
+                    <a href="https://www.linkedin.com/in/juan-f-angarita-cepeda-673031220/" target="_blank" class="dev-btn">
+                        <i class="fa-solid fa-user"></i> Juan F. Angarita C.
+                    </a>
+                    <a href="https://google.com" target="_blank" class="dev-btn">
+                        <i class="fa-solid fa-user"></i> Luis Miguel Umaña
+                    </a>
+                </div>
+                <div class="institucional-quote">
+                    "Contribuir con la formación de profesionales integrales, en diferentes áreas del conocimiento, fundamentados en valores institucionales con compromiso social, aportando al desarrollo de su proyecto de vida y su entorno."
+                </div>
+            </footer>
+        </div>
+        <a href="#proyecto" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+    <!-- SECCIÓN 2: INFORMACIÓN DEL PROYECTO -->
+    <div id="proyecto" class="section-wrapper">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>Contexto del Proyecto</h1>
+                    <p>Objetivos, Investigación y Enfoque General</p>
+                </div>
+                <div><i class="fa-solid fa-list-check" style="font-size: 35px; opacity: 0.8;"></i></div>
+            </header>
+
+            <main class="main-content" style="flex-direction: column; gap: 30px; justify-content: center;">
+                <div class="grid-3">
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fa-solid fa-bullseye"></i></div>
+                        <h3>Objetivo Principal</h3>
+                        <p>Mitigar la frustración técnica y reducir la brecha de asimilación en estudiantes de primer semestre al enfrentarse a la arquitectura de hardware.</p>
+                    </div>
+                    
+                    <!-- Tarjeta interactiva con acción de abrir el Modal -->
+                    <div class="info-card clickable-card" title="Clic para ampliar imagen" onclick="abrirModal()">
+                        <div class="info-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+                        <h3>Investigación Previa</h3>
+                        <p>Identificamos que los conceptos abstractos de hardware requieren acompañamiento continuo extra-clase para evitar la deserción inicial.</p>
+                        <div class="badge-link"><i class="fa-solid fa-expand"></i> Ver Imagen</div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fa-solid fa-lightbulb"></i></div>
+                        <h3>Enfoque de Accesibilidad</h3>
+                        <p>Despliegue bajo un modelo "Zero-Config" en WhatsApp, eliminando barreras de entrada tecnológicas, contraseñas o instalación de aplicaciones pesadas.</p>
+                    </div>
+                </div>
+
+                <a href="https://drive.google.com/drive/folders/1vJF9FqdDCejpuq4kc9Mhg8exkYlREykU?usp=sharing" target="_blank" class="btn-accion">
+                    <i class="fa-solid fa-file-pdf"></i> Documento del Proyecto
+                </a>
+            </main>
+        </div>
+        <a href="#pedagogia" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+    <!-- SECCIÓN 3: ESTRATEGIA PEDAGÓGICA -->
+    <div id="pedagogia" class="section-wrapper">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>Enfoque Pedagógico</h1>
+                    <p>Estrategias y Recursos Didácticos Implementados</p>
+                </div>
+                <div><i class="fa-solid fa-book-open" style="font-size: 35px; opacity: 0.8;"></i></div>
+            </header>
+
+            <main class="main-content" style="flex-direction: column;">
+                <div class="grid-3">
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fa-solid fa-mobile-screen"></i></div>
+                        <h3>Microaprendizaje Ubicuo</h3>
+                        <p>Diseñado para WhatsApp, entrega conceptos complejos (CPU, RAM, GPU) en píldoras de texto breves para evitar la saturación cognitiva.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fa-solid fa-spell-check"></i></div>
+                        <h3>Evaluación Formativa</h3>
+                        <p>La Prueba Piloto no solo califica, sino que ofrece retroalimentación inmediata, convirtiendo el error en una oportunidad de aprendizaje.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fa-solid fa-comments"></i></div>
+                        <h3>Aprendizaje Dialógico</h3>
+                        <p>La IA actúa como un tutor personalizado que responde dudas abiertas guiando al alumno mediante analogías en lugar de textos planos.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <a href="#desarrollo" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+    <!-- SECCIÓN 4: ARQUITECTURA TÉCNICA -->
+    <div id="desarrollo" class="section-wrapper">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>Arquitectura Técnica</h1>
+                    <p>Integración de Software, API y Lógica del Sistema</p>
+                </div>
+                <div><i class="fa-solid fa-code" style="font-size: 35px; opacity: 0.8;"></i></div>
+            </header>
+
+            <main class="main-content" style="flex-direction: column; gap: 30px;">
+                <div class="placeholder-box">
+                    <i class="fa-solid fa-laptop-code"></i>
+                    <h3>Área reservada para la arquitectura técnica...</h3>
+                    <p style="margin-top: 10px; color: #64748b;">(Aquí integraremos la información del desarrollo del bot de WhatsApp).</p>
+                </div>
+
+                <a href="LINK AQUÍ" target="_blank" class="btn-accion" style="background-color: var(--dark);">
+                    <i class="fa-brands fa-github"></i> Repositorio
+                </a>
+            </main>
+        </div>
+        <!-- Volver al inicio -->
+        <a href="#inicio" class="scroll-down" style="transform: translateX(-50%) rotate(180deg);"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+</div>
+
+<!-- VENTANA EMERGENTE (MODAL) PARA LA IMAGEN -->
+<div id="modalImagen" class="modal" onclick="cerrarModalFondo(event)">
+    <span class="close-btn" onclick="cerrarModal()">&times;</span>
+    <img class="modal-content" id="imgModal" src="IMG.png" alt="Investigación Previa">
+</div>
+
+<!-- Scripts de control del Modal -->
+<script>
+    const modal = document.getElementById("modalImagen");
+
+    // Función para mostrar el modal
+    function abrirModal() {
+        modal.classList.add("show");
+    }
+
+    // Función para ocultar el modal
+    function cerrarModal() {
+        modal.classList.remove("show");
+    }
+
+    // Cierra el modal si se hace clic en la zona oscura (fuera de la imagen)
+    function cerrarModalFondo(evento) {
+        if (evento.target === modal) {
+            cerrarModal();
+        }
+    }
+</script>
+
+</body>
+</html>
