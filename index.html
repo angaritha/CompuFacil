@@ -6,10 +6,10 @@
     <title>Presentación Interactiva - CompuFácil</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <style>
         :root {
-            --primary: #4d2433; 
+            --primary: #4d2433;
             --primary-light: #6a3246;
             --bg-color: #f1f5f9;
             --dark: #0f172a;
@@ -21,8 +21,8 @@
 
         html, body {
             height: 100vh;
-            height: 100dvh; /* Universal para PC y móviles modernos */
-            overflow: hidden; 
+            height: 100dvh;
+            overflow: hidden;
             background-color: var(--bg-color);
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: var(--dark);
@@ -44,13 +44,14 @@
             justify-content: center;
             align-items: center;
             padding: 15px;
-            scroll-snap-align: start; 
+            scroll-snap-align: start;
             position: relative;
         }
 
         .slide-container {
             width: 100%;
             max-width: 1200px;
+            max-height: 94vh;
             background: var(--white);
             border-radius: 20px;
             box-shadow: 0 15px 40px rgba(0,0,0,0.1);
@@ -89,23 +90,25 @@
         .header {
             background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
             color: var(--white);
-            padding: 25px 40px;
+            padding: 22px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
         }
-        .header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 32px; margin-bottom: 5px; }
-        .header p { font-size: 16px; opacity: 0.9; }
+        .header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 30px; margin-bottom: 5px; }
+        .header p { font-size: 15px; opacity: 0.9; }
 
         /* CUERPO CENTRAL */
         .main-content {
             display: flex;
-            padding: 40px;
-            gap: 40px;
+            padding: 35px 40px;
+            gap: 30px;
             align-items: center;
+            overflow-y: auto;
         }
 
-        /* TARJETA 1 */
+        /* TARJETA QR (sección de cierre) */
         .left-column {
             flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center;
             background: #f8fafc; padding: 30px; border-radius: 20px; border: 4px dashed var(--primary);
@@ -115,8 +118,8 @@
         .qr-title { font-size: 22px; color: var(--primary); font-weight: 800; margin-bottom: 15px; }
         .qr-link { transition: transform 0.4s; display: block; margin-bottom: 10px; }
         .qr-link:hover { transform: scale(1.08); }
-        .qr-link img { border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); width: 220px; height: 220px; }
-        
+        .qr-link img { border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); width: 200px; height: 200px; }
+
         /* BOTONES GLOBALES */
         .btn-accion {
             background: var(--primary); color: var(--white); text-decoration: none; padding: 12px 30px;
@@ -125,152 +128,128 @@
         }
         .btn-accion:hover { background: var(--primary-light); transform: translateY(-4px); box-shadow: 0 8px 20px rgba(77, 36, 51, 0.3); }
 
-        .right-column { flex: 1.2; display: flex; flex-direction: column; gap: 20px; }
+        .right-column { flex: 1.2; display: flex; flex-direction: column; gap: 16px; }
         .step-card {
-            background: #f8fafc; border-left: 8px solid var(--primary); padding: 20px;
-            border-radius: 12px; display: flex; align-items: center; gap: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: all 0.4s; cursor: pointer;
-        }
-        .step-card:hover {
-            transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 30px rgba(77, 36, 51, 0.15);
-            border-left-color: var(--primary-light); background: #ffffff;
+            background: #f8fafc; border-left: 8px solid var(--primary); padding: 18px 20px;
+            border-radius: 12px; display: flex; align-items: center; gap: 18px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: all 0.4s;
         }
         .step-icon {
-            width: 60px; height: 60px; background: var(--primary); color: var(--white);
+            width: 55px; height: 55px; background: var(--primary); color: var(--white);
             border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            font-size: 26px; flex-shrink: 0; transition: transform 0.4s ease;
+            font-size: 24px; flex-shrink: 0;
         }
-        .step-card:hover .step-icon { transform: rotate(-10deg) scale(1.1); background: var(--primary-light); }
-        .step-text h3 { font-size: 18px; color: var(--dark); margin-bottom: 5px; }
-        .step-text p { font-size: 15px; color: var(--gray); }
+        .step-text h3 { font-size: 17px; color: var(--dark); margin-bottom: 4px; }
+        .step-text p { font-size: 14px; color: var(--gray); }
         .cmd {
             background: var(--white); border: 2px solid var(--primary); color: var(--primary);
-            padding: 2px 8px; border-radius: 6px; font-family: monospace; font-weight: 800; transition: all 0.3s;
+            padding: 2px 8px; border-radius: 6px; font-family: monospace; font-weight: 800;
         }
-        .step-card:hover .cmd { background: var(--primary); color: var(--white); }
 
-        /* TARJETAS 2 y 3 (INFO DE PROYECTO Y PEDAGOGÍA) */
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; width: 100%; }
-        
+        /* TARJETAS DE INFORMACIÓN (grid de 3) */
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; width: 100%; }
+
         .info-card {
-            background: #f8fafc; padding: 30px 20px; border-radius: 15px; border-top: 6px solid var(--primary);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; transition: transform 0.3s, box-shadow 0.3s;
-            text-decoration: none; display: block; color: inherit; position: relative;
+            background: #f8fafc; padding: 26px 20px; border-radius: 15px; border-top: 6px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; color: inherit; position: relative;
         }
-        .info-card:hover { 
-            transform: translateY(-5px); 
-            background: #ffffff; 
-            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        .info-icon { font-size: 36px; color: var(--primary); margin-bottom: 14px; }
+        .info-card h3 { font-size: 18px; margin-bottom: 10px; color: var(--dark); }
+        .info-card p { font-size: 13.5px; color: var(--gray); line-height: 1.5; }
+
+        /* NÚMERO GRANDE (tarjetas de hallazgos) */
+        .stat-number {
+            font-family: 'Space Grotesk', sans-serif; font-size: 42px; font-weight: 800;
+            color: var(--primary); margin-bottom: 8px; line-height: 1;
         }
-        
-        .info-card.clickable-card { cursor: pointer; }
-        .info-card.clickable-card:hover .info-icon { transform: scale(1.1); }
-        .info-icon { font-size: 40px; color: var(--primary); margin-bottom: 15px; transition: transform 0.3s; }
-        .info-card h3 { font-size: 20px; margin-bottom: 12px; color: var(--dark); }
-        .info-card p { font-size: 14px; color: var(--gray); line-height: 1.5; }
-        
+
+        /* TIRA DE EQUIPO (presentación inicial) */
+        .intro-team {
+            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+            padding: 16px 40px 0; flex-shrink: 0;
+        }
+        .intro-team span { font-weight: 800; color: var(--dark); font-size: 14px; }
+
+        /* GRÁFICA DE LA ENCUESTA */
+        .chart-card {
+            background: #f8fafc; border-radius: 20px; padding: 28px 30px 22px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); width: 100%;
+        }
+
+        /* CALLOUT DESTACADO (hallazgo principal) */
+        .highlight-stat {
+            background: #f8fafc; border: 3px dashed var(--primary); border-radius: 20px;
+            padding: 28px 30px; text-align: center; width: 100%;
+        }
+        .highlight-stat .big-num {
+            font-family: 'Space Grotesk', sans-serif; font-size: 58px; font-weight: 800;
+            color: var(--primary); line-height: 1;
+        }
+        .highlight-stat p { color: var(--gray); font-size: 15px; margin-top: 8px; max-width: 560px; margin-left: auto; margin-right: auto; }
+        .survey-note { font-size: 12px; color: var(--gray); font-style: italic; text-align: center; margin-top: 4px; }
+
+        /* COLUMNAS DIVIDIDAS (problema/propósito, prototipo/evidencias) */
+        .split-content { display: flex; gap: 28px; width: 100%; align-items: stretch; }
+        .split-card {
+            flex: 1; background: #f8fafc; border-radius: 20px; padding: 30px;
+            border-top: 6px solid var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .split-card h3 { font-size: 20px; margin-bottom: 14px; color: var(--dark); }
+        .split-card p { font-size: 14.5px; color: var(--gray); line-height: 1.6; }
+        .bullet-list { list-style: disc; padding-left: 20px; }
+        .bullet-list li { font-size: 14.5px; color: var(--gray); line-height: 1.5; margin-bottom: 10px; }
+        .bullet-list li::marker { color: var(--primary); }
+        .evidence-links { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+        .evidence-links .btn-accion { width: 100%; }
+
         .badge-link {
             display: inline-flex; align-items: center; gap: 5px; background: var(--primary-light);
             color: var(--white); font-size: 11px; padding: 4px 10px; border-radius: 20px;
             margin-top: 15px; font-weight: 700;
         }
 
-        /* ESPACIO EN CONSTRUCCIÓN */
-        .placeholder-box {
-            background: #f1f5f9; border: 3px dashed #cbd5e1; border-radius: 15px;
-            padding: 50px 20px; text-align: center; width: 100%;
-        }
-        .placeholder-box i { font-size: 45px; color: #94a3b8; margin-bottom: 15px; }
-        .placeholder-box h3 { color: var(--gray); font-size: 20px; }
-
-        /* PIE DE PÁGINA */
+        /* PIE DE PÁGINA (sección de cierre) */
         .footer {
-            border-top: 2px solid #e2e8f0; padding: 25px 40px; display: flex;
-            flex-direction: column; gap: 15px; background: #ffffff;
+            border-top: 2px solid #e2e8f0; padding: 20px 40px; display: flex;
+            flex-direction: column; gap: 12px; background: #ffffff; flex-shrink: 0;
         }
         .developers-section { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .developers-section span { font-weight: 800; color: var(--dark); font-size: 16px; }
+        .developers-section span { font-weight: 800; color: var(--dark); font-size: 15px; }
         .dev-btn {
             background: var(--white); color: var(--primary); border: 2px solid var(--primary);
-            text-decoration: none; padding: 8px 18px; border-radius: 50px; font-weight: 700;
-            transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;
+            text-decoration: none; padding: 7px 16px; border-radius: 50px; font-weight: 700;
+            transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; font-size: 13px;
         }
-        .dev-btn:hover { background: var(--primary); color: var(--white); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(77, 36, 51, 0.2); }
+        .dev-btn:hover { background: var(--primary); color: var(--white); }
         .institucional-quote {
-            font-size: 13px; font-style: italic; font-weight: 700; color: var(--primary);
+            font-size: 12.5px; font-style: italic; font-weight: 700; color: var(--primary);
             line-height: 1.5; padding-left: 20px; border-left: 4px solid var(--primary);
         }
 
-        /* ESTILOS DEL MODAL (Ventana Emergente) */
-        .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 9999; 
-            left: 0;
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            background-color: rgba(15, 23, 42, 0.85); 
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .modal.show {
-            display: flex;
-            opacity: 1;
-        }
-        .modal-content {
-            max-width: 90%;
-            max-height: 85vh;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-        .modal.show .modal-content {
-            transform: scale(1);
-        }
-        .close-btn {
-            position: absolute;
-            top: 20px;
-            right: 40px;
-            color: #ffffff;
-            font-size: 45px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        .close-btn:hover {
-            color: var(--primary-light);
-        }
-
-        /* ====== ADAPTACIÓN PERFECTA PARA MÓVILES ====== */
+        /* ====== ADAPTACIÓN PARA MÓVILES ====== */
         @media (max-width: 768px) {
             .section-wrapper { padding: 0; }
-            .slide-container { border-radius: 0; min-height: 100vh; min-height: 100dvh; box-shadow: none; justify-content: center; }
-            .header { padding: 20px 25px; flex-direction: column; text-align: center; gap: 10px; }
-            .header h1 { font-size: 26px; }
-            .header p { font-size: 14px; }
-            .main-content { flex-direction: column; padding: 25px; gap: 25px; }
+            .slide-container { border-radius: 0; min-height: 100vh; min-height: 100dvh; max-height: none; box-shadow: none; }
+            .header { padding: 18px 22px; flex-direction: column; text-align: center; gap: 8px; }
+            .header h1 { font-size: 24px; }
+            .header p { font-size: 13px; }
+            .main-content { flex-direction: column; padding: 22px; gap: 20px; }
+            .split-content { flex-direction: column; }
             .left-column { padding: 20px; width: 100%; border-width: 3px; }
-            .qr-link img { width: 180px; height: 180px; }
+            .qr-link img { width: 170px; height: 170px; }
             .qr-title { font-size: 18px; margin-bottom: 10px; }
-            .right-column { width: 100%; gap: 15px; }
-            .step-card { padding: 15px; gap: 15px; border-left-width: 6px; }
-            .step-icon { width: 50px; height: 50px; font-size: 22px; }
-            .step-text h3 { font-size: 16px; }
-            .step-text p { font-size: 13px; }
-            .grid-3 { grid-template-columns: 1fr; gap: 15px; }
+            .right-column { width: 100%; gap: 12px; }
+            .step-card { padding: 14px; gap: 14px; border-left-width: 6px; }
+            .step-icon { width: 46px; height: 46px; font-size: 20px; }
+            .step-text h3 { font-size: 15px; }
+            .step-text p { font-size: 12.5px; }
+            .grid-3 { grid-template-columns: 1fr; gap: 14px; }
             .info-card { padding: 20px 15px; }
-            .footer { padding: 25px; text-align: center; gap: 20px; }
+            .footer { padding: 20px; text-align: center; gap: 16px; }
             .developers-section { flex-direction: column; gap: 10px; width: 100%; }
-            .developers-section span { display: block; margin-bottom: 5px; }
-            .institucional-quote {
-                padding-left: 0; padding-top: 15px; border-left: none;
-                border-top: 2px solid var(--primary); font-size: 12px;
-            }
-            .close-btn { top: 10px; right: 20px; font-size: 35px; }
+            .intro-team { padding: 14px 22px 0; justify-content: center; }
+            .institucional-quote { padding-left: 0; padding-top: 12px; border-left: none; border-top: 2px solid var(--primary); font-size: 11.5px; }
+            .highlight-stat .big-num { font-size: 46px; }
         }
     </style>
 </head>
@@ -278,15 +257,221 @@
 
 <div class="scroll-container">
 
-    <!-- SECCIÓN 1: INICIO Y ACCESO -->
-    <div id="inicio" class="section-wrapper">
+    <!-- SECCIÓN 1: PROBLEMA Y PROPÓSITO -->
+    <div id="problema" class="section-wrapper">
         <div class="slide-container">
             <header class="header">
                 <div>
                     <h1>CompuFácil</h1>
-                    <p>Tu Tutor Virtual de Hardware 24/7</p>
+                    <p>El problema que enfrentamos y hacia dónde apuntamos</p>
                 </div>
-                <div><i class="fa-solid fa-graduation-cap" style="font-size: 35px; opacity: 0.8;"></i></div>
+                <div><i class="fa-solid fa-graduation-cap" style="font-size: 34px; opacity: 0.8;"></i></div>
+            </header>
+
+            <div class="intro-team">
+                <span>Presentado por:</span>
+                <a href="https://www.linkedin.com/in/juan-f-angarita-cepeda-673031220/" target="_blank" class="dev-btn">
+                    <i class="fa-solid fa-user"></i> Juan F. Angarita C.
+                </a>
+                <a href="https://google.com" target="_blank" class="dev-btn">
+                    <i class="fa-solid fa-user"></i> Luis Miguel Umaña
+                </a>
+            </div>
+
+            <main class="main-content">
+                <div class="split-content">
+                    <div class="split-card">
+                        <div class="info-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <h3>El Problema</h3>
+                        <ul class="bullet-list">
+                            <li>Vacíos en conceptos básicos de hardware al ingresar a primer semestre.</li>
+                            <li>Términos técnicos poco claros o intimidantes para quien no tiene experiencia previa.</li>
+                            <li>Sin un espacio ágil para resolver dudas fuera del horario de clase.</li>
+                            <li>Alta curva de aprendizaje que genera desmotivación en los primeros meses.</li>
+                        </ul>
+                    </div>
+                    <div class="split-card">
+                        <div class="info-icon"><i class="fa-solid fa-bullseye"></i></div>
+                        <h3>Nuestro Propósito</h3>
+                        <p>Desarrollar <strong>CompuFácil</strong>, un chatbot educativo que guíe y refuerce el aprendizaje de Introducción al Hardware en estudiantes de primer semestre de Ingeniería de Sistemas, disponible las 24 horas desde el celular del estudiante y sin barreras de instalación.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <a href="#estrategia" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+    <!-- SECCIÓN 2: ESTRATEGIA DIDÁCTICA -->
+    <div id="estrategia" class="section-wrapper">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>Estrategia Didáctica</h1>
+                    <p>Dos fundamentos que guían el diseño del chatbot</p>
+                </div>
+                <div><i class="fa-solid fa-book-open" style="font-size: 34px; opacity: 0.8;"></i></div>
+            </header>
+
+            <main class="main-content" style="flex-direction: column;">
+                <div class="grid-3">
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fa-solid fa-brain"></i></div>
+                        <h3>Aprendizaje Significativo (Ausubel)</h3>
+                        <p>Los conceptos de hardware se explican con analogías conectadas a lo que el estudiante ya conoce, en lugar de definiciones aisladas para memorizar.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fa-solid fa-puzzle-piece"></i></div>
+                        <h3>Formación por Competencias (Tobón)</h3>
+                        <p>El chatbot plantea situaciones reales —como diagnosticar una falla— para que el estudiante aplique el conocimiento, no solo lo repita.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fa-solid fa-mobile-screen"></i></div>
+                        <h3>Microaprendizaje Ubicuo</h3>
+                        <p>Contenido entregado en píldoras breves por WhatsApp, disponible 24/7, evitando la saturación cognitiva.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <a href="#recursos" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+    <!-- SECCIÓN 3: RECURSOS, MATERIALES E INSTRUMENTOS -->
+    <div id="recursos" class="section-wrapper">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>Lo que Diseñamos</h1>
+                    <p>Recursos, materiales e instrumentos elaborados</p>
+                </div>
+                <div><i class="fa-solid fa-toolbox" style="font-size: 34px; opacity: 0.8;"></i></div>
+            </header>
+
+            <main class="main-content" style="flex-direction: column;">
+                <div class="grid-3">
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fa-solid fa-photo-film"></i></div>
+                        <h3>Recursos y Materiales Didácticos</h3>
+                        <p>Banco de preguntas frecuentes, videos cortos y guías digitales interactivas con analogías prácticas sobre CPU, RAM, GPU y demás componentes.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                        <h3>Instrumentos Elaborados</h3>
+                        <p>Encuesta diagnóstica, guion de entrevista y ficha de prueba de usabilidad, diseñados para levantar necesidades y evaluar la herramienta.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fa-solid fa-code"></i></div>
+                        <h3>Producto de Software</h3>
+                        <p>El chatbot mismo, desarrollado como producto de innovación: interacción por WhatsApp con procesamiento de lenguaje natural.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <a href="#hallazgos" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+    <!-- SECCIÓN 4: AVANCES Y HALLAZGOS (ENCUESTA) -->
+    <div id="hallazgos" class="section-wrapper">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>Avances y Hallazgos</h1>
+                    <p>Resultados de la encuesta diagnóstica</p>
+                </div>
+                <div><i class="fa-solid fa-chart-simple" style="font-size: 34px; opacity: 0.8;"></i></div>
+            </header>
+
+            <main class="main-content" style="flex-direction: column; gap: 18px;">
+                <div class="chart-card">
+                    <svg viewBox="0 0 660 232" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto; display:block;">
+                        <!-- Fila 1: Uso frecuente de herramientas digitales -->
+                        <text x="0" y="12" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700" fill="#0f172a">Usa herramientas digitales frecuentemente</text>
+                        <rect x="0" y="20" width="560" height="14" rx="7" fill="#e2e8f0"></rect>
+                        <rect x="0" y="20" width="560" height="14" rx="7" style="fill:var(--primary)"></rect>
+                        <text x="572" y="31" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" style="fill:var(--primary)">100%</text>
+
+                        <!-- Fila 2: Valora "fácil de usar" -->
+                        <text x="0" y="58" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700" fill="#0f172a">Valora "fácil de usar" como clave</text>
+                        <rect x="0" y="66" width="560" height="14" rx="7" fill="#e2e8f0"></rect>
+                        <rect x="0" y="66" width="487" height="14" rx="7" style="fill:var(--primary)"></rect>
+                        <text x="499" y="77" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" style="fill:var(--primary)">87%</text>
+
+                        <!-- Fila 3: Prefiere videos tutoriales -->
+                        <text x="0" y="104" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700" fill="#0f172a">Prefiere videos tutoriales para reforzar</text>
+                        <rect x="0" y="112" width="560" height="14" rx="7" fill="#e2e8f0"></rect>
+                        <rect x="0" y="112" width="448" height="14" rx="7" style="fill:var(--primary)"></rect>
+                        <text x="460" y="123" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" style="fill:var(--primary)">80%</text>
+
+                        <!-- Fila 4: Herramientas actuales insuficientes -->
+                        <text x="0" y="150" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700" fill="#0f172a">Considera insuficientes las herramientas actuales</text>
+                        <rect x="0" y="158" width="560" height="14" rx="7" fill="#e2e8f0"></rect>
+                        <rect x="0" y="158" width="224" height="14" rx="7" style="fill:var(--primary)"></rect>
+                        <text x="236" y="169" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" style="fill:var(--primary)">40%</text>
+
+                        <!-- Fila 5 (destacada): Le gustaría un chatbot -->
+                        <text x="0" y="196" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="800" fill="#0f172a">Le gustaría contar con un chatbot de apoyo</text>
+                        <rect x="0" y="204" width="560" height="16" rx="8" fill="#e2e8f0"></rect>
+                        <rect x="0" y="204" width="448" height="16" rx="8" style="fill:var(--primary-light)"></rect>
+                        <text x="460" y="217" font-family="Space Grotesk, sans-serif" font-size="16" font-weight="800" style="fill:var(--primary-light)">80%</text>
+                    </svg>
+                </div>
+
+                <div class="highlight-stat">
+                    <div class="big-num">80%</div>
+                    <p>de los encuestados le gustaría contar con un <strong>chatbot como apoyo</strong> a su aprendizaje — la validación directa de la propuesta CompuFácil.</p>
+                </div>
+                <p class="survey-note">*Encuesta piloto aplicada a 15 estudiantes de distintos programas y semestres de la Fundación Universitaria San Mateo, como fase exploratoria previa a su aplicación específica en el curso de Introducción al Hardware.</p>
+                <p class="survey-note" style="margin-top: -2px;"><i class="fa-solid fa-heart" style="color: var(--primary); margin-right: 6px;"></i>Agradecemos a la docente <strong style="color: var(--primary); font-style: normal;">Licet Yecenia Vargas</strong> por su apoyo en la aplicación de esta encuesta.</p>
+            </main>
+        </div>
+        <a href="#prototipo" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+    <!-- SECCIÓN 5: PROTOTIPO Y EVIDENCIAS -->
+    <div id="prototipo" class="section-wrapper">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>Prototipo y Evidencias</h1>
+                    <p>Lo que ya está funcionando</p>
+                </div>
+                <div><i class="fa-solid fa-robot" style="font-size: 34px; opacity: 0.8;"></i></div>
+            </header>
+
+            <main class="main-content">
+                <div class="split-content">
+                    <div class="split-card">
+                        <div class="info-icon"><i class="fa-solid fa-comments"></i></div>
+                        <h3>Prototipo Funcional</h3>
+                        <p>El chatbot ya está en funcionamiento y disponible por WhatsApp. Responde con procesamiento de lenguaje natural, ofrece retroalimentación inmediata y guía al estudiante paso a paso. <strong>Lo verán funcionando en vivo</strong> al cierre de esta presentación.</p>
+                    </div>
+                    <div class="split-card">
+                        <div class="info-icon"><i class="fa-solid fa-folder-open"></i></div>
+                        <h3>Evidencias del Proyecto</h3>
+                        <p>Documentación, avances y código fuente del desarrollo:</p>
+                        <div class="evidence-links">
+                            <a href="https://drive.google.com/drive/folders/1vJF9FqdDCejpuq4kc9Mhg8exkYlREykU?usp=sharing" target="_blank" class="btn-accion">
+                                <i class="fa-solid fa-file-pdf"></i> Documento del Proyecto
+                            </a>
+                            <a href="https://github.com/angaritha/CompuFacil" target="_blank" class="btn-accion" style="background-color: var(--dark);">
+                                <i class="fa-brands fa-github"></i> Repositorio
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <a href="#cierre" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+    <!-- SECCIÓN 6: CIERRE — QR Y DEMO EN VIVO -->
+    <div id="cierre" class="section-wrapper">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>Pruébalo Tú Mismo</h1>
+                    <p>Escanea el código y vive la experiencia CompuFácil</p>
+                </div>
+                <div><i class="fa-brands fa-whatsapp" style="font-size: 34px; opacity: 0.8;"></i></div>
             </header>
 
             <main class="main-content">
@@ -337,137 +522,10 @@
                 </div>
             </footer>
         </div>
-        <a href="#proyecto" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
-    </div>
-
-    <!-- SECCIÓN 2: INFORMACIÓN DEL PROYECTO -->
-    <div id="proyecto" class="section-wrapper">
-        <div class="slide-container">
-            <header class="header">
-                <div>
-                    <h1>Contexto del Proyecto</h1>
-                    <p>Objetivos, Investigación y Enfoque General</p>
-                </div>
-                <div><i class="fa-solid fa-list-check" style="font-size: 35px; opacity: 0.8;"></i></div>
-            </header>
-
-            <main class="main-content" style="flex-direction: column; gap: 30px; justify-content: center;">
-                <div class="grid-3">
-                    <div class="info-card">
-                        <div class="info-icon"><i class="fa-solid fa-bullseye"></i></div>
-                        <h3>Objetivo Principal</h3>
-                        <p>Mitigar la frustración técnica y reducir la brecha de asimilación en estudiantes de primer semestre al enfrentarse a la arquitectura de hardware.</p>
-                    </div>
-                    
-                    <div class="info-card clickable-card" title="Clic para ampliar imagen" onclick="abrirModal()">
-                        <div class="info-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
-                        <h3>Investigación Previa</h3>
-                        <p>Identificamos que los conceptos abstractos de hardware requieren acompañamiento continuo extra-clase para evitar la deserción inicial.</p>
-                        <div class="badge-link"><i class="fa-solid fa-expand"></i> Ver Imagen</div>
-                    </div>
-
-                    <div class="info-card">
-                        <div class="info-icon"><i class="fa-solid fa-lightbulb"></i></div>
-                        <h3>Enfoque de Accesibilidad</h3>
-                        <p>Despliegue bajo un modelo "Zero-Config" en WhatsApp, eliminando barreras de entrada tecnológicas, contraseñas o instalación de aplicaciones pesadas.</p>
-                    </div>
-                </div>
-
-                <a href="https://drive.google.com/drive/folders/1vJF9FqdDCejpuq4kc9Mhg8exkYlREykU?usp=sharing" target="_blank" class="btn-accion">
-                    <i class="fa-solid fa-file-pdf"></i> Documento del Proyecto
-                </a>
-            </main>
-        </div>
-        <a href="#pedagogia" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
-    </div>
-
-    <!-- SECCIÓN 3: ESTRATEGIA PEDAGÓGICA -->
-    <div id="pedagogia" class="section-wrapper">
-        <div class="slide-container">
-            <header class="header">
-                <div>
-                    <h1>Enfoque Pedagógico</h1>
-                    <p>Estrategias y Recursos Didácticos Implementados</p>
-                </div>
-                <div><i class="fa-solid fa-book-open" style="font-size: 35px; opacity: 0.8;"></i></div>
-            </header>
-
-            <main class="main-content" style="flex-direction: column;">
-                <div class="grid-3">
-                    <div class="info-card">
-                        <div class="info-icon"><i class="fa-solid fa-mobile-screen"></i></div>
-                        <h3>Microaprendizaje Ubicuo</h3>
-                        <p>Diseñado para WhatsApp, entrega conceptos complejos (CPU, RAM, GPU) en píldoras de texto breves para evitar la saturación cognitiva.</p>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon"><i class="fa-solid fa-spell-check"></i></div>
-                        <h3>Evaluación Formativa</h3>
-                        <p>La Prueba Piloto no solo califica, sino que ofrece retroalimentación inmediata, convirtiendo el error en una oportunidad de aprendizaje.</p>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon"><i class="fa-solid fa-comments"></i></div>
-                        <h3>Aprendizaje Dialógico</h3>
-                        <p>La IA actúa como un tutor personalizado que responde dudas abiertas guiando al alumno mediante analogías en lugar de textos planos.</p>
-                    </div>
-                </div>
-            </main>
-        </div>
-        <a href="#desarrollo" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
-    </div>
-
-    <!-- SECCIÓN 4: ARQUITECTURA TÉCNICA -->
-    <div id="desarrollo" class="section-wrapper">
-        <div class="slide-container">
-            <header class="header">
-                <div>
-                    <h1>Arquitectura Técnica</h1>
-                    <p>Integración de Software, API y Lógica del Sistema</p>
-                </div>
-                <div><i class="fa-solid fa-code" style="font-size: 35px; opacity: 0.8;"></i></div>
-            </header>
-
-            <main class="main-content" style="flex-direction: column; gap: 30px;">
-                <div class="placeholder-box">
-                    <i class="fa-solid fa-laptop-code"></i>
-                    <h3>Área reservada para la arquitectura técnica...</h3>
-                    <p style="margin-top: 10px; color: #64748b;">(Aquí integraremos la información del desarrollo del bot de WhatsApp).</p>
-                </div>
-
-                <a href="https://github.com/angaritha/CompuFacil" target="_blank" class="btn-accion" style="background-color: var(--dark);">
-                    <i class="fa-brands fa-github"></i> Repositorio
-                </a>
-            </main>
-        </div>
-        <!-- Flecha del final ajustada para volver al inicio (#inicio) -->
-        <a href="#inicio" class="scroll-down" style="transform: translateX(-50%) rotate(180deg);"><i class="fa-solid fa-chevron-down"></i></a>
+        <a href="#problema" class="scroll-down" style="transform: translateX(-50%) rotate(180deg);"><i class="fa-solid fa-chevron-down"></i></a>
     </div>
 
 </div>
-
-<!-- VENTANA EMERGENTE (MODAL) PARA LA IMAGEN -->
-<div id="modalImagen" class="modal" onclick="cerrarModalFondo(event)">
-    <span class="close-btn" onclick="cerrarModal()">&times;</span>
-    <img class="modal-content" id="imgModal" src="IMG.png" alt="Investigación Previa">
-</div>
-
-<!-- Scripts de control del Modal -->
-<script>
-    const modal = document.getElementById("modalImagen");
-
-    function abrirModal() {
-        modal.classList.add("show");
-    }
-
-    function cerrarModal() {
-        modal.classList.remove("show");
-    }
-
-    function cerrarModalFondo(evento) {
-        if (evento.target === modal) {
-            cerrarModal();
-        }
-    }
-</script>
 
 </body>
 </html>
