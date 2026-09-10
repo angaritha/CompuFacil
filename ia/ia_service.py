@@ -17,7 +17,10 @@ logging.basicConfig(level=logging.INFO)
 load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "TU_API_KEY_DE_GROQ_AQUI")
-MODEL_NAME = "llama-3.3-70b-versatile"
+# 'llama-3.3-70b-versatile' fue descontinuado por Groq el 16/08/2026.
+# Reemplazo oficial recomendado por Groq: openai/gpt-oss-120b.
+# Configurable por variable de entorno para futuras migraciones sin tocar código.
+MODEL_NAME = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
 # Cliente asíncrono apuntando a Groq (obligatorio por velocidad de respuesta,
 # evita bloqueos por cuota con 15+ usuarios concurrentes).
@@ -32,21 +35,26 @@ FOOTER = (
 )
 
 SYSTEM_PROMPT = (
-    "Eres 'CompuFácil', un tutor universitario experto EXCLUSIVAMENTE en "
-    "hardware y computación: CPU, RAM, almacenamiento (SSD/HDD), tarjetas "
-    "gráficas, placas madre, periféricos, mantenimiento de equipos, y temas "
-    "afines. Tu tono es cercano, paciente y didáctico. "
-    "Responde SIEMPRE en español, en un máximo de 2 párrafos cortos. "
-    "Usa *negritas* (formato WhatsApp, con asteriscos simples) para resaltar "
-    "los conceptos clave técnicos. No uses encabezados de markdown ni listas "
-    "numeradas extensas: mantén un tono conversacional y claro, como si le "
+    "Eres 'CompuFácil', un tutor universitario experto en hardware y "
+    "computación: CPU, RAM, ROM, almacenamiento (SSD/HDD), tarjetas "
+    "gráficas/GPU, placas madre, periféricos, generaciones y modelos de "
+    "componentes (incluye lanzamientos recientes o de 2026), mantenimiento "
+    "de equipos, comparativas entre componentes, y temas afines de "
+    "arquitectura de computadoras. Tu tono es cercano, paciente y didáctico.\n\n"
+    "Responde SIEMPRE en español, con el desarrollo que la pregunta merezca "
+    "(puedes usar hasta 3-4 párrafos si el tema lo amerita, no te limites a "
+    "una respuesta demasiado corta). Usa *negritas* (formato WhatsApp, con "
+    "asteriscos simples) para resaltar los conceptos clave técnicos. No uses "
+    "encabezados de markdown; puedes usar guiones simples para listas breves "
+    "si ayuda a la claridad. Mantén un tono conversacional, como si le "
     "explicaras a un estudiante de primer semestre de informática.\n\n"
-    "IMPORTANTE: si el usuario pregunta algo que NO tiene relación con "
-    "hardware o computación (por ejemplo temas personales, tareas de otras "
-    "materias, noticias, opiniones, etc.), NO lo respondas. En su lugar, "
-    "explícale amablemente en un solo párrafo breve que solo puedes ayudar "
-    "con temas de hardware y computación, e invítalo a hacer una pregunta "
-    "sobre ese tema."
+    "Solo debes rechazar preguntas que NO tengan relación alguna con "
+    "hardware, computación o tecnología (por ejemplo: tareas de otras "
+    "materias, temas personales, política, salud, etc.). Ante esos casos, "
+    "responde en un solo párrafo breve indicando que solo puedes ayudar con "
+    "temas de hardware y computación. Cualquier pregunta relacionada con "
+    "componentes de computador, comparativas entre ellos, o tecnología en "
+    "general SÍ debes responderla con gusto."
 )
 
 # --- Contingencia local basada en palabras clave si Groq falla ---
@@ -79,13 +87,56 @@ FALLBACK_KEYWORDS = {
         "Es más *económico* por gigabyte que un SSD, pero más lento y frágil "
         "ante golpes o caídas."
     ),
+    "rom": (
+        "La *ROM* (Read Only Memory) es una memoria de solo lectura que "
+        "guarda instrucciones básicas y permanentes (como el firmware de "
+        "arranque), a diferencia de la RAM, que es temporal y se borra al "
+        "apagar el equipo.\n\n"
+        "La ROM no se pierde sin energía; por eso el computador 'recuerda' "
+        "cómo iniciar cada vez que lo enciendes."
+    ),
+    "gpu": (
+        "La *GPU* o tarjeta gráfica es el componente encargado de procesar "
+        "y renderizar imágenes, video y gráficos 3D, liberando esa carga del "
+        "CPU.\n\n"
+        "Es especialmente importante para videojuegos, edición de video y "
+        "tareas de inteligencia artificial."
+    ),
+    "tarjeta grafica": (
+        "La *tarjeta gráfica (GPU)* procesa y renderiza imágenes, video y "
+        "gráficos 3D, liberando esa carga del CPU.\n\n"
+        "Es especialmente importante para videojuegos, edición de video y "
+        "tareas de inteligencia artificial."
+    ),
+    "placa madre": (
+        "La *placa madre (motherboard)* es el componente que conecta y "
+        "permite la comunicación entre todos los demás: CPU, RAM, "
+        "almacenamiento, tarjeta gráfica, etc.\n\n"
+        "Es literalmente la base física sobre la que se arma todo el "
+        "computador."
+    ),
+    "fuente de poder": (
+        "La *fuente de poder (PSU)* convierte la corriente eléctrica de la "
+        "toma de pared en la energía que necesitan los componentes internos "
+        "del computador para funcionar.\n\n"
+        "Elegir una de buena calidad y con la potencia adecuada protege al "
+        "resto del hardware."
+    ),
+    "usb": (
+        "Un puerto *USB* permite conectar dispositivos externos al "
+        "computador, como memorias, mouse, teclados o discos, y transferir "
+        "datos o energía entre ellos.\n\n"
+        "Existen varias versiones (USB 2.0, 3.0, USB-C) que varían "
+        "principalmente en velocidad de transferencia."
+    ),
     "default": (
         "En este momento no puedo conectarme con el motor de inteligencia "
         "artificial, pero con gusto te doy una idea general: la "
         "*arquitectura de computadoras* estudia cómo interactúan el *CPU*, "
-        "la *RAM* y el *almacenamiento* para ejecutar tareas.\n\n"
-        "Intenta reformular tu pregunta usando palabras como RAM, CPU, SSD o "
-        "HDD, o vuelve a intentarlo en unos segundos."
+        "la *RAM*, la *GPU* y el *almacenamiento* para ejecutar tareas.\n\n"
+        "Intenta reformular tu pregunta usando un término más específico "
+        "(RAM, CPU, GPU, SSD, HDD, ROM, placa madre...), o vuelve a "
+        "intentarlo en unos segundos."
     ),
 }
 
@@ -114,7 +165,7 @@ async def get_ai_response(user_message: str, history: list | None = None) -> str
             model=MODEL_NAME,
             messages=messages,
             temperature=0.6,
-            max_tokens=500,
+            max_tokens=850,
             timeout=25.0,
         )
         content = completion.choices[0].message.content.strip()

@@ -7,11 +7,45 @@
 
 const wppconnect = require('@wppconnect-team/wppconnect');
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 
 const FASTAPI_URL = process.env.FASTAPI_URL || 'http://localhost:8000/api/chat';
+const HISTORY_FILE = path.join(__dirname, 'quiz_history.json');
 
 // Estado independiente por cada usuario (número de teléfono), en memoria.
 const userState = {};
+
+// -----------------------------------------------------------------------
+// Historial de intentos del quiz, persistido en un archivo JSON local para
+// que sobreviva a reinicios del bot. Estructura:
+// { "573000000000@c.us": [ { date: "10/09/2026", score: 4, total: 5 }, ... ] }
+// -----------------------------------------------------------------------
+let quizHistory = {};
+try {
+  quizHistory = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'));
+} catch (err) {
+  quizHistory = {}; // Archivo aún no existe o está vacío: empezamos limpio.
+}
+
+function saveQuizHistory() {
+  try {
+    fs.writeFileSync(HISTORY_FILE, JSON.stringify(quizHistory, null, 2));
+  } catch (err) {
+    console.error('⚠️ No se pudo guardar el historial de quiz:', err.message);
+  }
+}
+
+function recordQuizAttempt(phone, score, total) {
+  if (!quizHistory[phone]) quizHistory[phone] = [];
+  const dateStr = new Date().toLocaleDateString('es-CO', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  quizHistory[phone].push({ date: dateStr, score, total });
+  saveQuizHistory();
+}
 
 // ---------------------------------------------------------------------------
 // Textos y contenido estático
@@ -163,7 +197,108 @@ const QUIZ = [
         'de entrada en esta lista.',
     },
   },
+  {
+    prompt:
+      `¿Cuál es la función de la *placa madre* (motherboard)?\n\n` +
+      `*A)* Conectar y coordinar la comunicación entre todos los componentes\n` +
+      `*B)* Almacenar el sistema operativo\n` +
+      `*C)* Enfriar el procesador`,
+    correct: 'a',
+    feedback: {
+      correct:
+        '✅ ¡Correcto! La placa madre es la base física que conecta y ' +
+        'coordina la comunicación entre el CPU, la RAM, el almacenamiento ' +
+        'y los demás componentes.',
+      incorrect:
+        '❌ No es así. Guardar el sistema operativo es tarea del ' +
+        '*almacenamiento*, y enfriar es tarea del *disipador/ventilador*. ' +
+        'La placa madre conecta y coordina todos los componentes.',
+    },
+  },
+  {
+    prompt:
+      `¿Qué mide la unidad *GHz* en un procesador?\n\n` +
+      `*A)* La velocidad de procesamiento\n` +
+      `*B)* La capacidad de almacenamiento\n` +
+      `*C)* La resolución de la pantalla`,
+    correct: 'a',
+    feedback: {
+      correct:
+        '✅ ¡Correcto! Los *GHz (gigahercios)* miden la velocidad a la que ' +
+        'el procesador ejecuta instrucciones.',
+      incorrect:
+        '❌ No es así. Los *GHz* miden la *velocidad de procesamiento* del ' +
+        'CPU, no el almacenamiento ni la resolución de pantalla.',
+    },
+  },
+  {
+    prompt:
+      `¿Cuál es la función principal de la *tarjeta gráfica* (GPU)?\n\n` +
+      `*A)* Procesar y mostrar imágenes, video y gráficos\n` +
+      `*B)* Guardar archivos de forma permanente\n` +
+      `*C)* Conectarse a internet`,
+    correct: 'a',
+    feedback: {
+      correct:
+        '✅ ¡Correcto! La GPU procesa y renderiza imágenes, video y ' +
+        'gráficos 3D, liberando esa carga del CPU.',
+      incorrect:
+        '❌ No es así. Guardar archivos es tarea del *almacenamiento*, y ' +
+        'conectarse a internet depende de la *tarjeta de red*. La GPU se ' +
+        'encarga de procesar y mostrar gráficos.',
+    },
+  },
+  {
+    prompt:
+      `¿Para qué sirve un puerto *USB*?\n\n` +
+      `*A)* Para conectar dispositivos externos como memorias, mouse o ` +
+      `teclados\n` +
+      `*B)* Para enfriar el computador\n` +
+      `*C)* Para aumentar la memoria RAM`,
+    correct: 'a',
+    feedback: {
+      correct:
+        '✅ ¡Correcto! Los puertos USB permiten conectar dispositivos ' +
+        'externos y transferir datos o energía entre ellos.',
+      incorrect:
+        '❌ No es así. Un puerto USB sirve para *conectar dispositivos ' +
+        'externos* (memorias, mouse, teclados, discos), no para enfriar ni ' +
+        'para aumentar la RAM.',
+    },
+  },
+  {
+    prompt:
+      `¿Cuál es la función de la *fuente de poder* (PSU)?\n\n` +
+      `*A)* Suministrar energía eléctrica a los componentes del computador\n` +
+      `*B)* Almacenar archivos de forma permanente\n` +
+      `*C)* Procesar gráficos y video`,
+    correct: 'a',
+    feedback: {
+      correct:
+        '✅ ¡Correcto! La fuente de poder convierte la corriente eléctrica ' +
+        'de la toma de pared en la energía que necesitan los componentes ' +
+        'internos para funcionar.',
+      incorrect:
+        '❌ No es así. Almacenar archivos es tarea del *disco* y procesar ' +
+        'gráficos es tarea de la *GPU*. La fuente de poder suministra ' +
+        'energía eléctrica a todo el computador.',
+    },
+  },
 ];
+
+/**
+ * Elige `count` preguntas al azar del banco completo QUIZ (sin repetir),
+ * mezclando el orden con Fisher-Yates. Así cada intento puede tener una
+ * combinación distinta de preguntas aunque el banco tenga más que `count`.
+ */
+function getRandomQuizSet(count = 5) {
+  const pool = [...QUIZ];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, Math.min(count, pool.length));
+}
 
 // ---------------------------------------------------------------------------
 // Manejo de estado por usuario
@@ -171,10 +306,11 @@ const QUIZ = [
 
 /**
  * Arma el texto completo de una pregunta del quiz con su encabezado
- * "Pregunta X/N" calculado dinámicamente a partir de QUIZ.length.
+ * "Pregunta X/N" calculado dinámicamente. Recibe el set de preguntas ya
+ * seleccionado al azar para este intento (no el banco completo).
  */
-function buildQuizQuestionText(index) {
-  return `📝 *Pregunta ${index + 1}/${QUIZ.length}*\n\n${QUIZ[index].prompt}`;
+function buildQuizQuestionText(quizSet, index) {
+  return `📝 *Pregunta ${index + 1}/${quizSet.length}*\n\n${quizSet[index].prompt}`;
 }
 
 function initUser(phone) {
@@ -182,6 +318,7 @@ function initUser(phone) {
     step: 'MENU',
     quizIndex: 0,
     quizAnswers: [],
+    quizSet: [],
   };
 }
 
@@ -222,7 +359,21 @@ async function handleMessage(client, message) {
         state.step = 'QUIZ';
         state.quizIndex = 0;
         state.quizAnswers = [];
-        await client.sendText(phone, buildQuizQuestionText(0));
+        state.quizSet = getRandomQuizSet(5); // 5 al azar de las 10 del banco
+
+        const previousAttempts = quizHistory[phone] || [];
+        if (previousAttempts.length > 0) {
+          const last = previousAttempts[previousAttempts.length - 1];
+          await client.sendText(
+            phone,
+            `📊 Ya realizaste esta prueba antes. Tu último intento fue el ` +
+              `*${last.date}* y obtuviste *${last.score}/${last.total}* ` +
+              `aciertos (intento nº ${previousAttempts.length}).\n\n` +
+              `¡Vamos con un nuevo intento! 💪`
+          );
+        }
+
+        await client.sendText(phone, buildQuizQuestionText(state.quizSet, 0));
       } else if (body === '3') {
         await client.sendText(phone, TUTORIALES_TEXT);
         await sendMenu(client, phone); // Vuelve al menú automáticamente
@@ -243,7 +394,7 @@ async function handleMessage(client, message) {
         break;
       }
 
-      const currentQuestion = QUIZ[state.quizIndex];
+      const currentQuestion = state.quizSet[state.quizIndex];
       const isCorrect = answer === currentQuestion.correct;
       state.quizAnswers.push({ answer, isCorrect });
 
@@ -254,13 +405,16 @@ async function handleMessage(client, message) {
 
       state.quizIndex += 1;
 
-      if (state.quizIndex < QUIZ.length) {
+      if (state.quizIndex < state.quizSet.length) {
         // Todavía hay preguntas pendientes: lanzar la siguiente.
-        await client.sendText(phone, buildQuizQuestionText(state.quizIndex));
+        await client.sendText(phone, buildQuizQuestionText(state.quizSet, state.quizIndex));
       } else {
-        // Quiz terminado: calificar y dar retroalimentación pedagógica.
+        // Quiz terminado: calificar, guardar en el historial y dar
+        // retroalimentación pedagógica.
         const score = state.quizAnswers.filter((a) => a.isCorrect).length;
-        const total = QUIZ.length;
+        const total = state.quizSet.length;
+
+        recordQuizAttempt(phone, score, total);
 
         let closingMessage =
           `🎓 *Resultado de tu Prueba Piloto*\n\n` +
@@ -268,17 +422,18 @@ async function handleMessage(client, message) {
 
         if (score === total) {
           closingMessage +=
-            'Dominas bien los conceptos de *RAM* y *SSD/HDD*. ¡Excelente ' +
-            'base para seguir avanzando! 👏';
+            'Dominas bien estos conceptos de hardware. ¡Excelente base ' +
+            'para seguir avanzando! 👏';
         } else if (score === 0) {
           closingMessage +=
-            'Vale la pena repasar la función de la *RAM* (memoria temporal) ' +
-            'y las ventajas del *SSD* (velocidad, sin partes móviles). Te ' +
-            'recomiendo revisar la opción *1* del menú.';
+            'Vale la pena repasar los conceptos básicos de hardware. Te ' +
+            'recomiendo preguntarle al *Tutor IA* (opción 1) sobre lo que ' +
+            'no te quedó claro.';
         } else {
           closingMessage +=
-            'Vas por buen camino, pero conviene repasar el concepto en el ' +
-            'que fallaste. Puedes revisarlo en la opción *1* del menú.';
+            'Vas por buen camino, pero conviene repasar los conceptos en ' +
+            'los que fallaste. Puedes preguntarle al *Tutor IA* (opción 1) ' +
+            'sobre esos temas específicos.';
         }
 
         closingMessage += '\n\nRegresando al menú principal...';
