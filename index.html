@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Presentación Interactiva - CompuFácil</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -12,9 +12,25 @@
             --primary: #4d2433;
             --primary-light: #6a3246;
             --bg-color: #f1f5f9;
+            --surface: #ffffff;
+            --card-bg: #f8fafc;
+            --border-soft: #e2e8f0;
             --dark: #0f172a;
             --gray: #64748b;
             --white: #ffffff;
+            --chip-bg: #0f172a;
+        }
+
+        html.dark-mode {
+            --primary: #b3728a;
+            --primary-light: #d99cb0;
+            --bg-color: #05070d;
+            --surface: #12141c;
+            --card-bg: #1a1d29;
+            --border-soft: #2c3040;
+            --dark: #eef0f6;
+            --gray: #9aa0b4;
+            --chip-bg: #3a3f52;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,6 +42,7 @@
             background-color: var(--bg-color);
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: var(--dark);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .scroll-container {
@@ -34,6 +51,7 @@
             overflow-y: scroll;
             scroll-snap-type: y mandatory;
             scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
 
         .section-wrapper {
@@ -45,6 +63,7 @@
             align-items: center;
             padding: 15px;
             scroll-snap-align: start;
+            scroll-snap-stop: always;
             position: relative;
         }
 
@@ -52,13 +71,14 @@
             width: 100%;
             max-width: 1200px;
             max-height: 94vh;
-            background: var(--white);
+            background: var(--surface);
             border-radius: 20px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             animation: fadeIn 0.8s ease-out forwards;
+            transition: background-color 0.3s ease;
         }
 
         @keyframes fadeIn {
@@ -72,7 +92,7 @@
             left: 50%;
             transform: translateX(-50%);
             color: var(--primary);
-            font-size: 35px;
+            font-size: 32px;
             text-decoration: none;
             animation: bounce 2s infinite;
             transition: color 0.3s;
@@ -86,11 +106,31 @@
             60% { transform: translateY(-5px) translateX(-50%); }
         }
 
+        /* BOTÓN DE TEMA (claro/oscuro) */
+        .theme-toggle {
+            position: fixed;
+            bottom: calc(18px + env(safe-area-inset-bottom));
+            right: calc(18px + env(safe-area-inset-right));
+            z-index: 2000;
+            width: 46px; height: 46px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 19px;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        .theme-toggle:hover { transform: scale(1.1); background: var(--primary); color: var(--white); }
+
         /* ENCABEZADOS */
         .header {
             background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
             color: var(--white);
             padding: 22px 40px;
+            padding-top: calc(22px + env(safe-area-inset-top));
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -102,23 +142,27 @@
         /* CUERPO CENTRAL */
         .main-content {
             display: flex;
+            flex: 1 1 auto;
+            min-height: 0;
             padding: 35px 40px;
             gap: 30px;
             align-items: center;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
 
         /* TARJETA QR (sección de cierre) */
         .left-column {
             flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center;
-            background: #f8fafc; padding: 30px; border-radius: 20px; border: 4px dashed var(--primary);
+            background: var(--card-bg); padding: 30px; border-radius: 20px; border: 4px dashed var(--primary);
             transition: all 0.3s ease;
         }
-        .left-column:hover { background: #e2e8f0; border-color: var(--primary-light); }
+        .left-column:hover { border-color: var(--primary-light); }
         .qr-title { font-size: 22px; color: var(--primary); font-weight: 800; margin-bottom: 15px; }
         .qr-link { transition: transform 0.4s; display: block; margin-bottom: 10px; }
         .qr-link:hover { transform: scale(1.08); }
-        .qr-link img { border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); width: 200px; height: 200px; }
+        .qr-link img { border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); width: 200px; height: 200px; background: #fff; padding: 6px; }
 
         /* BOTONES GLOBALES */
         .btn-accion {
@@ -130,7 +174,7 @@
 
         .right-column { flex: 1.2; display: flex; flex-direction: column; gap: 16px; }
         .step-card {
-            background: #f8fafc; border-left: 8px solid var(--primary); padding: 18px 20px;
+            background: var(--card-bg); border-left: 8px solid var(--primary); padding: 18px 20px;
             border-radius: 12px; display: flex; align-items: center; gap: 18px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: all 0.4s;
         }
@@ -142,7 +186,7 @@
         .step-text h3 { font-size: 17px; color: var(--dark); margin-bottom: 4px; }
         .step-text p { font-size: 14px; color: var(--gray); }
         .cmd {
-            background: var(--white); border: 2px solid var(--primary); color: var(--primary);
+            background: var(--surface); border: 2px solid var(--primary); color: var(--primary);
             padding: 2px 8px; border-radius: 6px; font-family: monospace; font-weight: 800;
         }
 
@@ -150,35 +194,57 @@
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; width: 100%; }
 
         .info-card {
-            background: #f8fafc; padding: 26px 20px; border-radius: 15px; border-top: 6px solid var(--primary);
+            background: var(--card-bg); padding: 26px 20px; border-radius: 15px; border-top: 6px solid var(--primary);
             box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; color: inherit; position: relative;
         }
         .info-icon { font-size: 36px; color: var(--primary); margin-bottom: 14px; }
         .info-card h3 { font-size: 18px; margin-bottom: 10px; color: var(--dark); }
         .info-card p { font-size: 13.5px; color: var(--gray); line-height: 1.5; }
 
-        /* NÚMERO GRANDE (tarjetas de hallazgos) */
-        .stat-number {
-            font-family: 'Space Grotesk', sans-serif; font-size: 42px; font-weight: 800;
-            color: var(--primary); margin-bottom: 8px; line-height: 1;
-        }
-
         /* TIRA DE EQUIPO (presentación inicial) */
         .intro-team {
-            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-            padding: 16px 40px 0; flex-shrink: 0;
+            display: flex; align-items: center; gap: 10px; flex-wrap: nowrap;
+            overflow-x: auto; padding: 16px 40px 0; flex-shrink: 0;
+            scrollbar-width: none;
         }
-        .intro-team span { font-weight: 800; color: var(--dark); font-size: 14px; }
+        .intro-team::-webkit-scrollbar { display: none; }
+        .intro-team span { font-weight: 800; color: var(--dark); font-size: 14px; white-space: nowrap; }
 
-        /* GRÁFICA DE LA ENCUESTA */
+        /* GRÁFICA DE LA ENCUESTA (barras HTML, ampliable) */
         .chart-card {
-            background: #f8fafc; border-radius: 20px; padding: 28px 30px 22px;
+            background: var(--card-bg); border-radius: 20px; padding: 26px 28px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05); width: 100%;
+            cursor: pointer; transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
+        .chart-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .chart-card-header {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            margin-bottom: 18px; flex-wrap: wrap;
+        }
+        .chart-card-title { font-size: 14px; font-weight: 800; color: var(--dark); }
+        .chart-hint {
+            display: inline-flex; align-items: center; gap: 5px; background: var(--primary-light);
+            color: var(--white); font-size: 10.5px; padding: 4px 10px; border-radius: 20px; font-weight: 700;
+            flex-shrink: 0;
+        }
+        .stats-list { display: flex; flex-direction: column; gap: 14px; }
+        .stat-row-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+        .stat-row-top .label { font-size: 12.5px; font-weight: 700; color: var(--dark); }
+        .stat-row-top .value { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 13.5px; color: var(--primary); flex-shrink: 0; }
+        .stat-bar-bg { background: var(--border-soft); border-radius: 20px; height: 12px; overflow: hidden; }
+        .stat-bar-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, var(--primary), var(--primary-light)); }
+        .stat-row.highlight .stat-row-top .label,
+        .stat-row.highlight .stat-row-top .value { color: var(--primary-light); }
+        .stat-row.highlight .stat-bar-fill { background: linear-gradient(90deg, var(--primary-light), var(--primary)); }
+
+        .stats-list.enlarged { gap: 26px; }
+        .stats-list.enlarged .stat-row-top .label { font-size: 18px; }
+        .stats-list.enlarged .stat-row-top .value { font-size: 19px; }
+        .stats-list.enlarged .stat-bar-bg { height: 20px; }
 
         /* CALLOUT DESTACADO (hallazgo principal) */
         .highlight-stat {
-            background: #f8fafc; border: 3px dashed var(--primary); border-radius: 20px;
+            background: var(--card-bg); border: 3px dashed var(--primary); border-radius: 20px;
             padding: 28px 30px; text-align: center; width: 100%;
         }
         .highlight-stat .big-num {
@@ -191,7 +257,7 @@
         /* COLUMNAS DIVIDIDAS (problema/propósito, prototipo/evidencias) */
         .split-content { display: flex; gap: 28px; width: 100%; align-items: stretch; }
         .split-card {
-            flex: 1; background: #f8fafc; border-radius: 20px; padding: 30px;
+            flex: 1; background: var(--card-bg); border-radius: 20px; padding: 30px;
             border-top: 6px solid var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
         .split-card h3 { font-size: 20px; margin-bottom: 14px; color: var(--dark); }
@@ -210,15 +276,21 @@
 
         /* PIE DE PÁGINA (sección de cierre) */
         .footer {
-            border-top: 2px solid #e2e8f0; padding: 20px 40px; display: flex;
-            flex-direction: column; gap: 12px; background: #ffffff; flex-shrink: 0;
+            border-top: 2px solid var(--border-soft); padding: 20px 40px; display: flex;
+            flex-direction: column; gap: 12px; background: var(--surface); flex-shrink: 0;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
         }
-        .developers-section { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .developers-section span { font-weight: 800; color: var(--dark); font-size: 15px; }
+        .developers-section {
+            display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;
+            overflow-x: auto; scrollbar-width: none; padding-bottom: 2px;
+        }
+        .developers-section::-webkit-scrollbar { display: none; }
+        .developers-section span { font-weight: 800; color: var(--dark); font-size: 15px; white-space: nowrap; }
         .dev-btn {
-            background: var(--white); color: var(--primary); border: 2px solid var(--primary);
+            background: var(--surface); color: var(--primary); border: 2px solid var(--primary);
             text-decoration: none; padding: 7px 16px; border-radius: 50px; font-weight: 700;
             transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; font-size: 13px;
+            white-space: nowrap; flex-shrink: 0;
         }
         .dev-btn:hover { background: var(--primary); color: var(--white); }
         .institucional-quote {
@@ -226,34 +298,77 @@
             line-height: 1.5; padding-left: 20px; border-left: 4px solid var(--primary);
         }
 
-        /* ====== ADAPTACIÓN PARA MÓVILES ====== */
+        /* MODAL (ventana emergente para ampliar la gráfica) */
+        .modal {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background-color: rgba(5, 7, 13, 0.85);
+            justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s ease; padding: 20px;
+        }
+        .modal.show { display: flex; opacity: 1; }
+        .modal-box {
+            background: var(--surface); border-radius: 16px; padding: 30px 32px;
+            width: 100%; max-width: 640px; max-height: 85vh; overflow-y: auto;
+            transform: scale(0.9); transition: transform 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative;
+        }
+        .modal.show .modal-box { transform: scale(1); }
+        .modal-box h3 {
+            font-family: 'Space Grotesk', sans-serif; color: var(--dark); margin-bottom: 22px; font-size: 20px;
+        }
+        .close-btn {
+            position: absolute; top: -6px; right: 0;
+            color: var(--white); font-size: 40px; font-weight: bold; cursor: pointer; transition: color 0.3s;
+        }
+        .close-btn:hover { color: var(--primary-light); }
+
+        /* ====== MÓVIL PRIMERO: AJUSTES FINOS ====== */
         @media (max-width: 768px) {
             .section-wrapper { padding: 0; }
-            .slide-container { border-radius: 0; min-height: 100vh; min-height: 100dvh; max-height: none; box-shadow: none; }
-            .header { padding: 18px 22px; flex-direction: column; text-align: center; gap: 8px; }
-            .header h1 { font-size: 24px; }
-            .header p { font-size: 13px; }
-            .main-content { flex-direction: column; padding: 22px; gap: 20px; }
-            .split-content { flex-direction: column; }
+            .slide-container { border-radius: 0; height: 100vh; height: 100dvh; box-shadow: none; }
+            .header { padding: 16px 20px; padding-top: calc(16px + env(safe-area-inset-top)); flex-direction: column; text-align: center; gap: 6px; }
+            .header h1 { font-size: 22px; }
+            .header p { font-size: 12.5px; }
+            .main-content { flex-direction: column; padding: 20px; gap: 18px; }
+            .split-content { flex-direction: column; gap: 18px; }
+            .split-card { padding: 22px; }
             .left-column { padding: 20px; width: 100%; border-width: 3px; }
-            .qr-link img { width: 170px; height: 170px; }
-            .qr-title { font-size: 18px; margin-bottom: 10px; }
-            .right-column { width: 100%; gap: 12px; }
-            .step-card { padding: 14px; gap: 14px; border-left-width: 6px; }
-            .step-icon { width: 46px; height: 46px; font-size: 20px; }
-            .step-text h3 { font-size: 15px; }
-            .step-text p { font-size: 12.5px; }
-            .grid-3 { grid-template-columns: 1fr; gap: 14px; }
-            .info-card { padding: 20px 15px; }
-            .footer { padding: 20px; text-align: center; gap: 16px; }
-            .developers-section { flex-direction: column; gap: 10px; width: 100%; }
-            .intro-team { padding: 14px 22px 0; justify-content: center; }
-            .institucional-quote { padding-left: 0; padding-top: 12px; border-left: none; border-top: 2px solid var(--primary); font-size: 11.5px; }
-            .highlight-stat .big-num { font-size: 46px; }
+            .qr-link img { width: 165px; height: 165px; }
+            .qr-title { font-size: 17px; margin-bottom: 8px; }
+            .right-column { width: 100%; gap: 10px; }
+            .step-card { padding: 13px; gap: 12px; border-left-width: 6px; }
+            .step-icon { width: 42px; height: 42px; font-size: 18px; }
+            .step-text h3 { font-size: 14.5px; }
+            .step-text p { font-size: 12px; }
+            .grid-3 { grid-template-columns: 1fr; gap: 12px; }
+            .info-card { padding: 18px 15px; }
+            .footer { padding: 16px 18px; text-align: center; gap: 14px; }
+            .developers-section { justify-content: flex-start; }
+            .intro-team { padding: 12px 18px 0; justify-content: flex-start; }
+            .institucional-quote { padding-left: 0; padding-top: 12px; border-left: none; border-top: 2px solid var(--primary); font-size: 11px; text-align: left; }
+            .highlight-stat { padding: 22px 20px; }
+            .highlight-stat .big-num { font-size: 42px; }
+            .highlight-stat p { font-size: 13.5px; }
+            .chart-card { padding: 20px 18px; }
+            .stat-row-top .label { font-size: 11.5px; }
+            .stat-row-top .value { font-size: 12.5px; }
+            .theme-toggle { width: 44px; height: 44px; font-size: 17px; bottom: calc(14px + env(safe-area-inset-bottom)); right: calc(14px + env(safe-area-inset-right)); }
+            .modal-box { padding: 24px 20px; }
+            .close-btn { font-size: 34px; top: -2px; }
+        }
+
+        @media (max-width: 380px) {
+            .header h1 { font-size: 20px; }
+            .dev-btn { font-size: 12px; padding: 6px 13px; }
+            .info-card h3 { font-size: 16.5px; }
         }
     </style>
 </head>
 <body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Cambiar tema claro/oscuro">
+    <i class="fa-solid fa-sun" id="themeIcon"></i>
+</button>
 
 <div class="scroll-container">
 
@@ -381,38 +496,33 @@
             </header>
 
             <main class="main-content" style="flex-direction: column; gap: 18px;">
-                <div class="chart-card">
-                    <svg viewBox="0 0 660 232" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto; display:block;">
-                        <!-- Fila 1: Uso frecuente de herramientas digitales -->
-                        <text x="0" y="12" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700" fill="#0f172a">Usa herramientas digitales frecuentemente</text>
-                        <rect x="0" y="20" width="560" height="14" rx="7" fill="#e2e8f0"></rect>
-                        <rect x="0" y="20" width="560" height="14" rx="7" style="fill:var(--primary)"></rect>
-                        <text x="572" y="31" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" style="fill:var(--primary)">100%</text>
-
-                        <!-- Fila 2: Valora "fácil de usar" -->
-                        <text x="0" y="58" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700" fill="#0f172a">Valora "fácil de usar" como clave</text>
-                        <rect x="0" y="66" width="560" height="14" rx="7" fill="#e2e8f0"></rect>
-                        <rect x="0" y="66" width="487" height="14" rx="7" style="fill:var(--primary)"></rect>
-                        <text x="499" y="77" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" style="fill:var(--primary)">87%</text>
-
-                        <!-- Fila 3: Prefiere videos tutoriales -->
-                        <text x="0" y="104" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700" fill="#0f172a">Prefiere videos tutoriales para reforzar</text>
-                        <rect x="0" y="112" width="560" height="14" rx="7" fill="#e2e8f0"></rect>
-                        <rect x="0" y="112" width="448" height="14" rx="7" style="fill:var(--primary)"></rect>
-                        <text x="460" y="123" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" style="fill:var(--primary)">80%</text>
-
-                        <!-- Fila 4: Herramientas actuales insuficientes -->
-                        <text x="0" y="150" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700" fill="#0f172a">Considera insuficientes las herramientas actuales</text>
-                        <rect x="0" y="158" width="560" height="14" rx="7" fill="#e2e8f0"></rect>
-                        <rect x="0" y="158" width="224" height="14" rx="7" style="fill:var(--primary)"></rect>
-                        <text x="236" y="169" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" style="fill:var(--primary)">40%</text>
-
-                        <!-- Fila 5 (destacada): Le gustaría un chatbot -->
-                        <text x="0" y="196" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="800" fill="#0f172a">Le gustaría contar con un chatbot de apoyo</text>
-                        <rect x="0" y="204" width="560" height="16" rx="8" fill="#e2e8f0"></rect>
-                        <rect x="0" y="204" width="448" height="16" rx="8" style="fill:var(--primary-light)"></rect>
-                        <text x="460" y="217" font-family="Space Grotesk, sans-serif" font-size="16" font-weight="800" style="fill:var(--primary-light)">80%</text>
-                    </svg>
+                <div class="chart-card" id="chartCard" onclick="abrirGrafico()" role="button" tabindex="0" aria-label="Ampliar gráfica de resultados">
+                    <div class="chart-card-header">
+                        <span class="chart-card-title"><i class="fa-solid fa-chart-simple" style="margin-right:6px; color:var(--primary);"></i>Resultados de la encuesta</span>
+                        <div class="chart-hint"><i class="fa-solid fa-expand"></i> Toca para ampliar</div>
+                    </div>
+                    <div class="stats-list" id="statsListOriginal">
+                        <div class="stat-row">
+                            <div class="stat-row-top"><span class="label">Usa herramientas digitales frecuentemente</span><span class="value">100%</span></div>
+                            <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:100%;"></div></div>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-row-top"><span class="label">Valora "fácil de usar" como clave</span><span class="value">87%</span></div>
+                            <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:87%;"></div></div>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-row-top"><span class="label">Prefiere videos tutoriales para reforzar</span><span class="value">80%</span></div>
+                            <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:80%;"></div></div>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-row-top"><span class="label">Considera insuficientes las herramientas actuales</span><span class="value">40%</span></div>
+                            <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:40%;"></div></div>
+                        </div>
+                        <div class="stat-row highlight">
+                            <div class="stat-row-top"><span class="label">Le gustaría contar con un chatbot de apoyo</span><span class="value">80%</span></div>
+                            <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:80%;"></div></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="highlight-stat">
@@ -452,7 +562,7 @@
                             <a href="https://drive.google.com/drive/folders/1vJF9FqdDCejpuq4kc9Mhg8exkYlREykU?usp=sharing" target="_blank" class="btn-accion">
                                 <i class="fa-solid fa-file-pdf"></i> Documento del Proyecto
                             </a>
-                            <a href="https://github.com/angaritha/CompuFacil" target="_blank" class="btn-accion" style="background-color: var(--dark);">
+                            <a href="https://github.com/angaritha/CompuFacil" target="_blank" class="btn-accion" style="background-color: var(--chip-bg);">
                                 <i class="fa-brands fa-github"></i> Repositorio
                             </a>
                         </div>
@@ -526,6 +636,57 @@
     </div>
 
 </div>
+
+<!-- MODAL: GRÁFICA AMPLIADA -->
+<div id="modalGrafico" class="modal" onclick="cerrarModalFondo(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <span class="close-btn" onclick="cerrarGrafico()">&times;</span>
+        <h3>Resultados de la Encuesta</h3>
+        <div id="modalGraficoBody"></div>
+    </div>
+</div>
+
+<script>
+    // Tema claro / oscuro
+    function toggleTheme() {
+        const html = document.documentElement;
+        const icon = document.getElementById('themeIcon');
+        html.classList.toggle('dark-mode');
+        if (html.classList.contains('dark-mode')) {
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        } else {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        }
+    }
+
+    // Ampliar gráfica de la encuesta
+    function abrirGrafico() {
+        const original = document.getElementById('statsListOriginal');
+        const clone = original.cloneNode(true);
+        clone.removeAttribute('id');
+        clone.classList.add('enlarged');
+        const body = document.getElementById('modalGraficoBody');
+        body.innerHTML = '';
+        body.appendChild(clone);
+        document.getElementById('modalGrafico').classList.add('show');
+    }
+
+    function cerrarGrafico() {
+        document.getElementById('modalGrafico').classList.remove('show');
+    }
+
+    function cerrarModalFondo(evento) {
+        if (evento.target.id === 'modalGrafico') {
+            cerrarGrafico();
+        }
+    }
+
+    document.getElementById('chartCard').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') abrirGrafico();
+    });
+</script>
 
 </body>
 </html>
