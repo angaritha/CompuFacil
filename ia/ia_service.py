@@ -7,6 +7,7 @@ para generar respuestas de tutoría rápidas, con contingencia local si Groq fal
 import os
 import logging
 from dotenv import load_dotenv
+import openai
 from openai import AsyncOpenAI
 
 logger = logging.getLogger("ia_service")
@@ -21,6 +22,12 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY", "TU_API_KEY_DE_GROQ_AQUI")
 # Reemplazo oficial recomendado por Groq: openai/gpt-oss-120b.
 # Configurable por variable de entorno para futuras migraciones sin tocar código.
 MODEL_NAME = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+
+# openai/gpt-oss-120b en el plan free de Groq tiene 8,000 tokens/minuto y
+# 200,000 tokens/día. Con max_tokens=500 (en vez de 850) casi se duplica la
+# cantidad real de peticiones que caben en esos límites, manteniendo
+# respuestas de 2-3 párrafos completos.
+MAX_RESPONSE_TOKENS = int(os.getenv("GROQ_MAX_TOKENS", "500"))
 
 # Cliente asíncrono apuntando a Groq (obligatorio por velocidad de respuesta,
 # evita bloqueos por cuota con 15+ usuarios concurrentes).
@@ -58,102 +65,137 @@ SYSTEM_PROMPT = (
 )
 
 # --- Contingencia local basada en palabras clave si Groq falla ---
-FALLBACK_KEYWORDS = {
-    "ram": (
-        "La *memoria RAM* (Random Access Memory) es la memoria volátil donde "
-        "el computador guarda temporalmente los datos y programas que está "
-        "usando en este momento. Se llama volátil porque su contenido se "
-        "borra al apagar el equipo.\n\n"
-        "A mayor *capacidad de RAM*, más programas puede manejar el sistema "
-        "de forma fluida al mismo tiempo."
-    ),
-    "cpu": (
-        "El *CPU* (Unidad Central de Procesamiento) es el 'cerebro' del "
-        "computador: se encarga de ejecutar las instrucciones de los "
-        "programas mediante operaciones aritméticas y lógicas.\n\n"
-        "Su velocidad se mide en *GHz* y su rendimiento también depende del "
-        "número de *núcleos (cores)* que tenga."
-    ),
-    "ssd": (
-        "Un *SSD* (Solid State Drive) usa memoria flash sin partes móviles, "
-        "por lo que es mucho más *rápido* y resistente a golpes que un HDD "
-        "tradicional.\n\n"
-        "Esto se traduce en tiempos de *arranque* e *inicio de aplicaciones* "
-        "considerablemente menores."
-    ),
-    "hdd": (
-        "Un *HDD* (Hard Disk Drive) almacena información en discos "
-        "magnéticos giratorios leídos por un cabezal mecánico.\n\n"
-        "Es más *económico* por gigabyte que un SSD, pero más lento y frágil "
-        "ante golpes o caídas."
-    ),
-    "rom": (
-        "La *ROM* (Read Only Memory) es una memoria de solo lectura que "
-        "guarda instrucciones básicas y permanentes (como el firmware de "
-        "arranque), a diferencia de la RAM, que es temporal y se borra al "
-        "apagar el equipo.\n\n"
-        "La ROM no se pierde sin energía; por eso el computador 'recuerda' "
-        "cómo iniciar cada vez que lo enciendes."
-    ),
-    "gpu": (
-        "La *GPU* o tarjeta gráfica es el componente encargado de procesar "
-        "y renderizar imágenes, video y gráficos 3D, liberando esa carga del "
-        "CPU.\n\n"
-        "Es especialmente importante para videojuegos, edición de video y "
-        "tareas de inteligencia artificial."
-    ),
-    "tarjeta grafica": (
-        "La *tarjeta gráfica (GPU)* procesa y renderiza imágenes, video y "
-        "gráficos 3D, liberando esa carga del CPU.\n\n"
-        "Es especialmente importante para videojuegos, edición de video y "
-        "tareas de inteligencia artificial."
-    ),
-    "placa madre": (
-        "La *placa madre (motherboard)* es el componente que conecta y "
-        "permite la comunicación entre todos los demás: CPU, RAM, "
-        "almacenamiento, tarjeta gráfica, etc.\n\n"
-        "Es literalmente la base física sobre la que se arma todo el "
-        "computador."
-    ),
-    "fuente de poder": (
-        "La *fuente de poder (PSU)* convierte la corriente eléctrica de la "
-        "toma de pared en la energía que necesitan los componentes internos "
-        "del computador para funcionar.\n\n"
-        "Elegir una de buena calidad y con la potencia adecuada protege al "
-        "resto del hardware."
-    ),
-    "usb": (
-        "Un puerto *USB* permite conectar dispositivos externos al "
-        "computador, como memorias, mouse, teclados o discos, y transferir "
-        "datos o energía entre ellos.\n\n"
-        "Existen varias versiones (USB 2.0, 3.0, USB-C) que varían "
-        "principalmente en velocidad de transferencia."
-    ),
-    "default": (
-        "En este momento no puedo conectarme con el motor de inteligencia "
-        "artificial, pero con gusto te doy una idea general: la "
-        "*arquitectura de computadoras* estudia cómo interactúan el *CPU*, "
-        "la *RAM*, la *GPU* y el *almacenamiento* para ejecutar tareas.\n\n"
-        "Intenta reformular tu pregunta usando un término más específico "
-        "(RAM, CPU, GPU, SSD, HDD, ROM, placa madre...), o vuelve a "
-        "intentarlo en unos segundos."
-    ),
-}
+# Cada tema tiene una lista de SINÓNIMOS: si el mensaje del usuario contiene
+# cualquiera de ellos (venga como "¿qué es...?", "¿cómo funciona...?", etc.,
+# no importa la forma de la pregunta), se devuelve esa respuesta local.
+FALLBACK_TOPICS = [
+    {
+        "keywords": ["ram", "memoria ram"],
+        "response": (
+            "La *memoria RAM* (Random Access Memory) es la memoria volátil donde "
+            "el computador guarda temporalmente los datos y programas que está "
+            "usando en este momento. Se llama volátil porque su contenido se "
+            "borra al apagar el equipo.\n\n"
+            "A mayor *capacidad de RAM*, más programas puede manejar el sistema "
+            "de forma fluida al mismo tiempo."
+        ),
+    },
+    {
+        "keywords": ["cpu", "procesador", "microprocesador"],
+        "response": (
+            "El *CPU* (Unidad Central de Procesamiento) es el 'cerebro' del "
+            "computador: se encarga de ejecutar las instrucciones de los "
+            "programas mediante operaciones aritméticas y lógicas.\n\n"
+            "Su velocidad se mide en *GHz* y su rendimiento también depende del "
+            "número de *núcleos (cores)* que tenga."
+        ),
+    },
+    {
+        "keywords": ["ssd", "disco solido", "disco sólido", "estado solido"],
+        "response": (
+            "Un *SSD* (Solid State Drive) usa memoria flash sin partes móviles, "
+            "por lo que es mucho más *rápido* y resistente a golpes que un HDD "
+            "tradicional.\n\n"
+            "Esto se traduce en tiempos de *arranque* e *inicio de aplicaciones* "
+            "considerablemente menores."
+        ),
+    },
+    {
+        "keywords": ["hdd", "disco duro", "disco mecanico", "disco mecánico"],
+        "response": (
+            "Un *HDD* (Hard Disk Drive) almacena información en discos "
+            "magnéticos giratorios leídos por un cabezal mecánico.\n\n"
+            "Es más *económico* por gigabyte que un SSD, pero más lento y frágil "
+            "ante golpes o caídas."
+        ),
+    },
+    {
+        "keywords": ["rom", "memoria rom"],
+        "response": (
+            "La *ROM* (Read Only Memory) es una memoria de solo lectura que "
+            "guarda instrucciones básicas y permanentes (como el firmware de "
+            "arranque), a diferencia de la RAM, que es temporal y se borra al "
+            "apagar el equipo.\n\n"
+            "La ROM no se pierde sin energía; por eso el computador 'recuerda' "
+            "cómo iniciar cada vez que lo enciendes."
+        ),
+    },
+    {
+        "keywords": [
+            "gpu", "tarjeta grafica", "tarjeta gráfica",
+            "tarjeta de video", "tarjeta de vídeo",
+        ],
+        "response": (
+            "La *GPU* o tarjeta gráfica es el componente encargado de procesar "
+            "y renderizar imágenes, video y gráficos 3D, liberando esa carga del "
+            "CPU.\n\n"
+            "Es especialmente importante para videojuegos, edición de video y "
+            "tareas de inteligencia artificial."
+        ),
+    },
+    {
+        "keywords": ["placa madre", "motherboard", "placa base"],
+        "response": (
+            "La *placa madre (motherboard)* es el componente que conecta y "
+            "permite la comunicación entre todos los demás: CPU, RAM, "
+            "almacenamiento, tarjeta gráfica, etc.\n\n"
+            "Es literalmente la base física sobre la que se arma todo el "
+            "computador."
+        ),
+    },
+    {
+        "keywords": ["fuente de poder", "fuente de alimentacion", "fuente de alimentación", "psu"],
+        "response": (
+            "La *fuente de poder (PSU)* convierte la corriente eléctrica de la "
+            "toma de pared en la energía que necesitan los componentes internos "
+            "del computador para funcionar.\n\n"
+            "Elegir una de buena calidad y con la potencia adecuada protege al "
+            "resto del hardware."
+        ),
+    },
+    {
+        "keywords": ["usb", "puerto usb"],
+        "response": (
+            "Un puerto *USB* permite conectar dispositivos externos al "
+            "computador, como memorias, mouse, teclados o discos, y transferir "
+            "datos o energía entre ellos.\n\n"
+            "Existen varias versiones (USB 2.0, 3.0, USB-C) que varían "
+            "principalmente en velocidad de transferencia."
+        ),
+    },
+]
+
+FALLBACK_DEFAULT = (
+    "En este momento el motor de inteligencia artificial está temporalmente "
+    "fuera de servicio (puede ser un límite de uso), pero con gusto te doy "
+    "una idea general: la *arquitectura de computadoras* estudia cómo "
+    "interactúan el *CPU*, la *RAM*, la *GPU* y el *almacenamiento* para "
+    "ejecutar tareas.\n\n"
+    "Intenta reformular tu pregunta usando un término más específico (RAM, "
+    "CPU, GPU, SSD, HDD, ROM, placa madre, fuente de poder, USB...), o "
+    "vuelve a intentarlo en un par de minutos."
+)
 
 
 def _fallback_response(user_message: str) -> str:
-    """Respuesta local de contingencia basada en palabras clave."""
+    """
+    Respuesta local de contingencia. Busca cualquier sinónimo conocido del
+    tema dentro del mensaje del usuario, sin importar si la pregunta viene
+    en forma de '¿qué es...?', '¿cómo funciona...?' u otra redacción —
+    solo importa que el término aparezca en el texto.
+    """
     text = user_message.lower()
-    for keyword, response in FALLBACK_KEYWORDS.items():
-        if keyword != "default" and keyword in text:
-            return response
-    return FALLBACK_KEYWORDS["default"]
+    for topic in FALLBACK_TOPICS:
+        if any(keyword in text for keyword in topic["keywords"]):
+            return topic["response"]
+    return FALLBACK_DEFAULT
 
 
 async def get_ai_response(user_message: str, history: list | None = None) -> str:
     """
-    Consulta a Groq (Llama 3.3 70B) y devuelve la respuesta ya formateada
-    con el pie de página estándar. Si Groq falla, usa la contingencia local.
+    Consulta a Groq y devuelve la respuesta ya formateada con el pie de
+    página estándar. Si Groq falla (por cualquier motivo: límite de uso,
+    llave inválida, timeout, etc.), usa la contingencia local.
     """
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     if history:
@@ -165,11 +207,22 @@ async def get_ai_response(user_message: str, history: list | None = None) -> str
             model=MODEL_NAME,
             messages=messages,
             temperature=0.6,
-            max_tokens=850,
+            max_tokens=MAX_RESPONSE_TOKENS,
             timeout=25.0,
         )
         content = completion.choices[0].message.content.strip()
         return content + FOOTER
+    except openai.RateLimitError as exc:
+        # Límite de tokens/peticiones por minuto o por día alcanzado.
+        # Generar una nueva API Key NO soluciona esto: el límite es por
+        # cuenta/organización, se resetea solo (por minuto o al día
+        # siguiente), o se sube activando el Developer tier en Groq.
+        logger.warning(f"Límite de uso (TPM/TPD) alcanzado en Groq: {exc}")
+        return _fallback_response(user_message) + FOOTER
+    except openai.AuthenticationError as exc:
+        # Esta sí es una API Key inválida/revocada: hay que reemplazarla.
+        logger.error(f"API Key de Groq inválida o revocada: {exc}")
+        return _fallback_response(user_message) + FOOTER
     except Exception as exc:
         logger.error(f"Error al conectar con Groq: {exc}")
         return _fallback_response(user_message) + FOOTER

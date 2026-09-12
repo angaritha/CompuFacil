@@ -47,6 +47,58 @@ function recordQuizAttempt(phone, score, total) {
   saveQuizHistory();
 }
 
+/**
+ * Arma el texto del historial de intentos para un usuario: lista cada
+ * intento con fecha y puntaje, calcula el promedio general, y agrega una
+ * retroalimentación simple según si mejoró, empeoró o se mantuvo respecto
+ * a su intento anterior.
+ */
+function buildHistoryReport(phone) {
+  const attempts = quizHistory[phone] || [];
+
+  if (attempts.length === 0) {
+    return (
+      `📊 *Mi historial de intentos*\n\n` +
+      `Aún no has realizado la Prueba Piloto. Escribe *2* para hacerla por ` +
+      `primera vez.`
+    );
+  }
+
+  let text = `📊 *Mi historial de intentos*\n\n`;
+  attempts.forEach((attempt, i) => {
+    const pct = Math.round((attempt.score / attempt.total) * 100);
+    text += `${i + 1}. ${attempt.date} — *${attempt.score}/${attempt.total}* (${pct}%)\n`;
+  });
+
+  const avgPct = Math.round(
+    attempts.reduce((sum, a) => sum + (a.score / a.total) * 100, 0) /
+      attempts.length
+  );
+  text += `\n📈 Promedio general: *${avgPct}%*\n\n`;
+
+  if (attempts.length >= 2) {
+    const last = attempts[attempts.length - 1];
+    const prev = attempts[attempts.length - 2];
+    const lastPct = (last.score / last.total) * 100;
+    const prevPct = (prev.score / prev.total) * 100;
+
+    if (lastPct > prevPct) {
+      text += '🚀 ¡Vas mejorando respecto a tu intento anterior! Sigue así.';
+    } else if (lastPct < prevPct) {
+      text +=
+        '💡 Tu último intento bajó un poco respecto al anterior. Te ' +
+        'recomiendo repasar con el *Tutor IA* (opción 1) antes de tu ' +
+        'próximo intento.';
+    } else {
+      text += '➡️ Te mantienes estable. ¡Sigue practicando para mejorar!';
+    }
+  } else {
+    text += 'Haz otro intento para ver tu progreso reflejado aquí. 💪';
+  }
+
+  return text;
+}
+
 // ---------------------------------------------------------------------------
 // Textos y contenido estático
 // ---------------------------------------------------------------------------
@@ -56,7 +108,8 @@ const MENU_TEXT =
   `Selecciona una opción escribiendo el número:\n\n` +
   `*1* - 🤖 Tutor IA de Hardware (pregunta lo que quieras)\n` +
   `*2* - 📝 Prueba Piloto (Evaluación diagnóstica)\n` +
-  `*3* - 🎬 Tutoriales (próximamente)\n\n` +
+  `*3* - 🎬 Tutoriales (próximamente)\n` +
+  `*4* - 📊 Mi historial de intentos\n\n` +
   `_Escribe *MENU* en cualquier momento para volver aquí._`;
 
 const TUTOR_WELCOME_TEXT =
@@ -377,10 +430,13 @@ async function handleMessage(client, message) {
       } else if (body === '3') {
         await client.sendText(phone, TUTORIALES_TEXT);
         await sendMenu(client, phone); // Vuelve al menú automáticamente
+      } else if (body === '4') {
+        await client.sendText(phone, buildHistoryReport(phone));
+        await sendMenu(client, phone); // Vuelve al menú automáticamente
       } else {
         await client.sendText(
           phone,
-          '⚠️ Opción no válida. Por favor escribe *1*, *2* o *3*.'
+          '⚠️ Opción no válida. Por favor escribe *1*, *2*, *3* o *4*.'
         );
       }
       break;
