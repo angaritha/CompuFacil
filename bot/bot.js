@@ -7,6 +7,7 @@
 const wppconnect = require('@wppconnect-team/wppconnect');
 const api = require('./api');
 const { handleMessage } = require('./flows');
+const contentSync = require('./contentSync');
 
 // Cola por usuario: los mensajes de una misma persona se procesan en orden,
 // y los de personas distintas en paralelo.
@@ -26,6 +27,7 @@ function start(client) {
   api.health().then((h) =>
     console.log(h ? `🧠 Servicio de IA conectado (${api.BASE_URL})` : `⚠️ El servicio de IA no responde en ${api.BASE_URL}. Inícialo con: cd ia && python main.py`)
   );
+  contentSync.start();
 
   client.onMessage((message) => {
     if (message.isGroupMsg || message.fromMe) return;

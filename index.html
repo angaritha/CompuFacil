@@ -2,8 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Presentación Interactiva - CompuFácil</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>CompuFácil · Tutor de hardware en WhatsApp</title>
+    <meta name="description" content="CompuFácil: chatbot educativo de WhatsApp con IA, voz y panel docente para aprender fundamentos de hardware. Fundación Universitaria San Mateo.">
+    <meta property="og:title" content="CompuFácil · Tutor de hardware en WhatsApp">
+    <meta property="og:description" content="Tutor con IA, videotutoriales, prueba diagnóstica, accesibilidad por voz y panel para el docente.">
+    <meta property="og:image" content="img/chat-inicio.webp">
+    <meta name="theme-color" content="#4d2433">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -362,6 +367,175 @@
             .dev-btn { font-size: 12px; padding: 6px 13px; }
             .info-card h3 { font-size: 16.5px; }
         }
+    
+        /* ====== NUEVO: navegación por puntos ====== */
+        .dots {
+            position: fixed; right: 22px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 10px; z-index: 1500;
+        }
+        .dots a {
+            width: 10px; height: 10px; border-radius: 50%; background: var(--border-soft);
+            border: 2px solid var(--primary); transition: all .25s ease; position: relative;
+        }
+        .dots a.active { background: var(--primary); transform: scale(1.25); }
+        .dots a span {
+            position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+            background: var(--primary); color: var(--white); font-size: 11px; font-weight: 700;
+            padding: 3px 9px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none;
+            transition: opacity .2s;
+        }
+        .dots a:hover span { opacity: 1; }
+
+        /* ====== NUEVO: rejillas ====== */
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; width: 100%; }
+
+        .info-card.left { text-align: left; }
+        .info-card.left .info-icon { margin-bottom: 10px; }
+
+        /* Tarjetas de funciones del menú */
+        .feature-card {
+            background: var(--card-bg); border-radius: 15px; padding: 18px 18px 16px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-top: 5px solid var(--primary);
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .feature-top { display: flex; align-items: center; gap: 10px; }
+        .feature-num {
+            width: 34px; height: 34px; border-radius: 10px; background: var(--primary); color: var(--white);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 17px; flex-shrink: 0;
+        }
+        .feature-top i { color: var(--primary); font-size: 20px; margin-left: auto; }
+        .feature-card h3 { font-size: 15.5px; color: var(--dark); }
+        .feature-card p { font-size: 12.8px; color: var(--gray); line-height: 1.5; }
+        .feature-card.wide { grid-column: span 2; }
+        .tag-new {
+            display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .4px;
+            background: var(--primary-light); color: var(--white); padding: 2px 7px; border-radius: 6px;
+            margin-left: 6px; vertical-align: middle; text-transform: uppercase;
+        }
+
+        /* Ejemplos de voz */
+        .voice-sample {
+            margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px;
+        }
+        .voice-sample span {
+            font-size: 11.5px; font-weight: 700; color: var(--primary);
+            border: 1.5px solid var(--primary); border-radius: 20px; padding: 3px 10px; background: var(--surface);
+        }
+        .voice-sample span i { margin-right: 4px; }
+
+        /* Arquitectura */
+        .arch {
+            display: flex; align-items: stretch; gap: 10px; width: 100%;
+        }
+        .arch-node {
+            flex: 1; background: var(--card-bg); border-radius: 14px; padding: 16px 14px; text-align: center;
+            border: 2px solid var(--border-soft); box-shadow: 0 5px 15px rgba(0,0,0,0.04);
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+        }
+        .arch-node i { font-size: 26px; color: var(--primary); }
+        .arch-node h4 { font-size: 14.5px; color: var(--dark); }
+        .arch-node p { font-size: 12px; color: var(--gray); line-height: 1.45; }
+        .arch-node.core { border-color: var(--primary); }
+        .arch-arrow {
+            display: flex; align-items: center; color: var(--primary); font-size: 18px; flex-shrink: 0;
+        }
+        .arch-sub {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: 100%; margin-top: 6px;
+        }
+        .arch-sub div {
+            background: var(--surface); border: 1.5px dashed var(--primary); border-radius: 10px;
+            padding: 6px 8px; font-size: 11.5px; font-weight: 700; color: var(--primary);
+        }
+        .pill-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; width: 100%; }
+        .pill {
+            display: flex; gap: 12px; align-items: flex-start; background: var(--card-bg);
+            border-left: 6px solid var(--primary); border-radius: 12px; padding: 14px 16px;
+        }
+        .pill i { color: var(--primary); font-size: 20px; margin-top: 2px; }
+        .pill h4 { font-size: 14px; color: var(--dark); margin-bottom: 3px; }
+        .pill p { font-size: 12.5px; color: var(--gray); line-height: 1.45; }
+
+        .tech-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .tech-row span {
+            font-size: 11.5px; font-weight: 700; color: var(--gray); background: var(--card-bg);
+            border: 1px solid var(--border-soft); border-radius: 20px; padding: 4px 11px;
+        }
+
+        .section-lead { font-size: 14.5px; color: var(--gray); text-align: center; max-width: 820px; margin: 0 auto; line-height: 1.55; }
+        .section-lead strong { color: var(--dark); }
+
+        @media (max-width: 1024px) {
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .feature-card.wide { grid-column: span 2; }
+        }
+        @media (max-width: 900px) {
+            .arch { flex-direction: column; }
+            .arch-arrow { justify-content: center; transform: rotate(90deg); }
+            .pill-row { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .dots { display: none; }
+            .grid-2 { grid-template-columns: 1fr; gap: 12px; }
+            .grid-4 { grid-template-columns: 1fr; gap: 12px; }
+            .feature-card.wide { grid-column: auto; }
+            .section-lead { font-size: 13px; }
+        }
+
+        /* Funciones + celular */
+        .feature-layout { display: flex; gap: 26px; width: 100%; align-items: center; }
+        .feature-layout > .grid-features, .feature-layout > .grid-2 { flex: 1; }
+        .grid-features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .grid-features .feature-card.wide { grid-column: span 2; }
+        .phone-fig { flex: none; text-align: center; margin: 0; }
+        .phone-fig img { width: 250px; height: auto; display: block; cursor: zoom-in; filter: drop-shadow(0 12px 22px rgba(0,0,0,.18)); transition: transform .25s ease; }
+        .phone-fig img:hover { transform: translateY(-4px); }
+        .phone-fig figcaption { font-size: 12.5px; color: var(--gray); margin-top: 8px; }
+        .phone-fig figcaption b { color: var(--dark); }
+        .phone-strip { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px 4px 14px; scrollbar-width: thin; justify-content: safe center; }
+        .phone-strip .phone-fig { scroll-snap-align: center; }
+        .phone-strip .phone-fig img { width: 220px; }
+        .strip-nav { display: flex; justify-content: center; gap: 10px; }
+        .strip-nav button { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary); background: var(--card-bg); color: var(--primary); cursor: pointer; }
+
+        /* Galería del panel */
+        .panel-layout { flex-direction: column; align-items: stretch; gap: 14px; }
+        .panel-tabs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .panel-tabs button {
+            font: inherit; font-size: 13px; font-weight: 700; padding: 7px 14px; border-radius: 50px;
+            border: 2px solid var(--primary); background: var(--surface); color: var(--primary); cursor: pointer;
+            display: inline-flex; align-items: center; gap: 7px; transition: all .2s;
+        }
+        .panel-tabs button.active, .panel-tabs button:hover { background: var(--primary); color: var(--white); }
+        .panel-shot { margin: 0; text-align: center; }
+        .panel-shot img {
+            width: 100%; max-width: 980px; height: auto; border-radius: 12px; border: 1px solid var(--border-soft);
+            box-shadow: 0 12px 30px rgba(0,0,0,.12); cursor: zoom-in; display: block; margin: 0 auto;
+            max-height: 52vh; object-fit: cover; object-position: top;
+        }
+        .panel-shot.small img { max-height: 30vh; }
+        .panel-shot figcaption { font-size: 13px; color: var(--gray); margin-top: 10px; max-width: 760px; margin-left: auto; margin-right: auto; }
+
+        /* Imagen ampliada */
+        .img-modal { cursor: zoom-out; }
+        .img-modal img { max-width: 94vw; max-height: 90vh; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.5); background: #fff; }
+        .img-close { position: fixed; top: 14px; right: 22px; }
+
+        @media (max-width: 1024px) {
+            .feature-layout { flex-direction: column; }
+            .phone-fig img { width: 230px; margin: 0 auto; }
+        }
+        @media (max-width: 768px) {
+            .grid-features { grid-template-columns: 1fr; }
+            .grid-features .feature-card.wide { grid-column: auto; }
+            .phone-strip { justify-content: flex-start; }
+            .phone-strip .phone-fig img { width: 230px; }
+            .strip-nav { display: flex; }
+            .panel-shot img { max-height: none; }
+            .panel-shot.small img { max-height: none; }
+            .arch-sub { grid-template-columns: 1fr 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -370,15 +544,17 @@
     <i class="fa-solid fa-sun" id="themeIcon"></i>
 </button>
 
-<div class="scroll-container">
+<nav class="dots" id="dots" aria-label="Secciones"></nav>
 
-    <!-- SECCIÓN 1: PROBLEMA Y PROPÓSITO -->
-    <div id="problema" class="section-wrapper">
+<div class="scroll-container" id="scroller">
+
+    <!-- 1. PROBLEMA Y PROPÓSITO -->
+    <div id="problema" class="section-wrapper" data-title="Inicio">
         <div class="slide-container">
             <header class="header">
                 <div>
                     <h1>CompuFácil</h1>
-                    <p>El problema que enfrentamos y hacia dónde apuntamos</p>
+                    <p>Tutor de hardware en WhatsApp, con inteligencia artificial, voz y panel para el docente</p>
                 </div>
                 <div><i class="fa-solid fa-graduation-cap" style="font-size: 34px; opacity: 0.8;"></i></div>
             </header>
@@ -409,49 +585,55 @@
                         <div class="info-icon"><i class="fa-solid fa-bullseye"></i></div>
                         <h3>Nuestro Propósito</h3>
                         <p>Desarrollar <strong>CompuFácil</strong>, un chatbot educativo que guíe y refuerce el aprendizaje de Introducción al Hardware en estudiantes de primer semestre de Ingeniería de Sistemas, disponible las 24 horas desde el celular del estudiante y sin barreras de instalación.</p>
+                        <p style="margin-top:12px">Hoy ya es un <strong>producto funcional</strong>: tutor con IA, videotutoriales, prueba diagnóstica, seguimiento del progreso, opinión del estudiante, accesibilidad por voz y un panel web donde el docente ve los datos y administra el contenido.</p>
                     </div>
                 </div>
             </main>
         </div>
-        <a href="#estrategia" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
+        <a href="#estrategia" class="scroll-down" aria-label="Siguiente"><i class="fa-solid fa-chevron-down"></i></a>
     </div>
 
-    <!-- SECCIÓN 2: ESTRATEGIA DIDÁCTICA -->
-    <div id="estrategia" class="section-wrapper">
+    <!-- 2. ESTRATEGIA DIDÁCTICA -->
+    <div id="estrategia" class="section-wrapper" data-title="Estrategia">
         <div class="slide-container">
             <header class="header">
                 <div>
                     <h1>Estrategia Didáctica</h1>
-                    <p>Dos fundamentos que guían el diseño del chatbot</p>
+                    <p>Los fundamentos que guían el diseño del chatbot</p>
                 </div>
                 <div><i class="fa-solid fa-book-open" style="font-size: 34px; opacity: 0.8;"></i></div>
             </header>
 
             <main class="main-content" style="flex-direction: column;">
-                <div class="grid-3">
-                    <div class="info-card">
+                <div class="grid-2">
+                    <div class="info-card left">
                         <div class="info-icon"><i class="fa-solid fa-brain"></i></div>
                         <h3>Aprendizaje Significativo (Ausubel)</h3>
-                        <p>Los conceptos de hardware se explican con analogías conectadas a lo que el estudiante ya conoce, en lugar de definiciones aisladas para memorizar.</p>
+                        <p>Los conceptos de hardware se explican con analogías conectadas a lo que el estudiante ya conoce —la placa madre como una ciudad, la RAM como un escritorio—, en lugar de definiciones aisladas para memorizar.</p>
                     </div>
-                    <div class="info-card">
+                    <div class="info-card left">
                         <div class="info-icon"><i class="fa-solid fa-puzzle-piece"></i></div>
                         <h3>Formación por Competencias (Tobón)</h3>
-                        <p>El chatbot plantea situaciones reales —como diagnosticar una falla— para que el estudiante aplique el conocimiento, no solo lo repita.</p>
+                        <p>El chatbot plantea situaciones reales y mini retos después de cada video para que el estudiante aplique el conocimiento, no solo lo repita.</p>
                     </div>
-                    <div class="info-card">
+                    <div class="info-card left">
                         <div class="info-icon"><i class="fa-solid fa-mobile-screen"></i></div>
                         <h3>Microaprendizaje Ubicuo</h3>
-                        <p>Contenido entregado en píldoras breves por WhatsApp, disponible 24/7, evitando la saturación cognitiva.</p>
+                        <p>Píldoras breves por WhatsApp —videos de 1 a 3 minutos, ideas clave y preguntas cortas—, disponibles 24/7 y sin saturación cognitiva.</p>
+                    </div>
+                    <div class="info-card left">
+                        <div class="info-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
+                        <h3>Retroalimentación Inmediata</h3>
+                        <p>Cada respuesta de la prueba trae su explicación y, al final, se recomienda el video del tema que falló: el error se convierte en una oportunidad de aprendizaje.</p>
                     </div>
                 </div>
             </main>
         </div>
-        <a href="#recursos" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
+        <a href="#recursos" class="scroll-down" aria-label="Siguiente"><i class="fa-solid fa-chevron-down"></i></a>
     </div>
 
-    <!-- SECCIÓN 3: RECURSOS, MATERIALES E INSTRUMENTOS -->
-    <div id="recursos" class="section-wrapper">
+    <!-- 3. LO QUE DISEÑAMOS -->
+    <div id="recursos" class="section-wrapper" data-title="Diseño">
         <div class="slide-container">
             <header class="header">
                 <div>
@@ -466,26 +648,26 @@
                     <div class="info-card">
                         <div class="info-icon"><i class="fa-solid fa-photo-film"></i></div>
                         <h3>Recursos y Materiales Didácticos</h3>
-                        <p>Banco de preguntas frecuentes, videos cortos y guías digitales interactivas con analogías prácticas sobre CPU, RAM, GPU y demás componentes.</p>
+                        <p>Ocho videotutoriales cortos, del procesador al ensamble de un PC, con ideas clave y mini retos; un banco de 20 preguntas con explicación y analogías prácticas sobre CPU, RAM, GPU y demás componentes.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon"><i class="fa-solid fa-clipboard-list"></i></div>
                         <h3>Instrumentos Elaborados</h3>
-                        <p>Encuesta diagnóstica, guion de entrevista y ficha de prueba de usabilidad, diseñados para levantar necesidades y evaluar la herramienta.</p>
+                        <p>Encuesta diagnóstica, guion de entrevista y ficha de prueba de usabilidad. Dentro del chat, una encuesta de opinión (estrellas, categoría y comentario) evalúa la herramienta de forma continua.</p>
                     </div>
                     <div class="info-card">
                         <div class="info-icon"><i class="fa-solid fa-code"></i></div>
                         <h3>Producto de Software</h3>
-                        <p>El chatbot mismo, desarrollado como producto de innovación: interacción por WhatsApp con procesamiento de lenguaje natural.</p>
+                        <p>El chatbot de WhatsApp con inteligencia artificial y voz, más un panel web para que el docente siga el uso, lea los comentarios y administre los videos, las preguntas y las respuestas.</p>
                     </div>
                 </div>
             </main>
         </div>
-        <a href="#hallazgos" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
+        <a href="#hallazgos" class="scroll-down" aria-label="Siguiente"><i class="fa-solid fa-chevron-down"></i></a>
     </div>
 
-    <!-- SECCIÓN 4: AVANCES Y HALLAZGOS (ENCUESTA) -->
-    <div id="hallazgos" class="section-wrapper">
+    <!-- 4. AVANCES Y HALLAZGOS (ENCUESTA) -->
+    <div id="hallazgos" class="section-wrapper" data-title="Hallazgos">
         <div class="slide-container">
             <header class="header">
                 <div>
@@ -527,17 +709,284 @@
 
                 <div class="highlight-stat">
                     <div class="big-num">80%</div>
-                    <p>de los encuestados le gustaría contar con un <strong>chatbot como apoyo</strong> a su aprendizaje — la validación directa de la propuesta CompuFácil.</p>
+                    <p>de los encuestados le gustaría contar con un <strong>chatbot como apoyo</strong> a su aprendizaje — la validación directa de la propuesta CompuFácil. Por eso los <strong>videotutoriales</strong> (80 %) y la <strong>facilidad de uso</strong> (87 %) guiaron el desarrollo.</p>
                 </div>
                 <p class="survey-note">*Encuesta piloto aplicada a 15 estudiantes de distintos programas y semestres de la Fundación Universitaria San Mateo, como fase exploratoria previa a su aplicación específica en el curso de Introducción al Hardware.</p>
                 <p class="survey-note" style="margin-top: -2px;"><i class="fa-solid fa-heart" style="color: var(--primary); margin-right: 6px;"></i>Agradecemos a la docente <strong style="color: var(--primary); font-style: normal;">Licet Yecenia Vargas</strong> por su apoyo en la aplicación de esta encuesta.</p>
             </main>
         </div>
-        <a href="#prototipo" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
+        <a href="#funciones" class="scroll-down" aria-label="Siguiente"><i class="fa-solid fa-chevron-down"></i></a>
     </div>
 
-    <!-- SECCIÓN 5: PROTOTIPO Y EVIDENCIAS -->
-    <div id="prototipo" class="section-wrapper">
+    <!-- 5. FUNCIONES DEL CHATBOT -->
+    <div id="funciones" class="section-wrapper" data-title="Funciones">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>¿Qué hace CompuFácil?</h1>
+                    <p>Siete opciones en un menú que se usa con números, palabras o notas de voz</p>
+                </div>
+                <div><i class="fa-solid fa-robot" style="font-size: 34px; opacity: 0.8;"></i></div>
+            </header>
+
+            <main class="main-content">
+                <div class="feature-layout">
+                    <div class="grid-features">
+                        <div class="feature-card">
+                            <div class="feature-top"><span class="feature-num">1</span><h3>Tutor IA</h3><i class="fa-solid fa-robot"></i></div>
+                            <p>Responde dudas de hardware con analogías y <strong>recuerda la conversación</strong>. <span class="cmd">NUEVO</span> cambia de tema y 👍/👎 califican cada respuesta.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-top"><span class="feature-num">2</span><h3>Videotutoriales</h3><i class="fa-solid fa-film"></i></div>
+                            <p>Ocho temas. El video llega <strong>dentro del chat</strong> con sus ideas clave y un <strong>mini reto</strong> para practicar.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-top"><span class="feature-num">3</span><h3>Prueba diagnóstica</h3><i class="fa-solid fa-clipboard-check"></i></div>
+                            <p>5 preguntas al azar de un banco de 20, de temas distintos, con <strong>explicación inmediata</strong> y videos recomendados según lo que falló.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-top"><span class="feature-num">4</span><h3>Mi progreso</h3><i class="fa-solid fa-chart-line"></i></div>
+                            <p>Intentos, promedio, tendencia, temas por reforzar, videos vistos y preguntas hechas al tutor.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-top"><span class="feature-num">5</span><h3>Tu opinión</h3><i class="fa-solid fa-comment-dots"></i></div>
+                            <p>Calificación de 1 a 5 estrellas, categoría y comentario libre que el docente lee en el panel.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-top"><span class="feature-num">6</span><h3>Ayuda</h3><i class="fa-solid fa-circle-info"></i></div>
+                            <p>Instrucciones y comandos útiles, también en voz para quien lo necesite.</p>
+                        </div>
+                        <div class="feature-card wide">
+                            <div class="feature-top"><span class="feature-num">7</span><h3>Modo accesible <span class="tag-new">nuevo</span></h3><i class="fa-solid fa-universal-access"></i></div>
+                            <p>Mensajes sin emojis ni adornos, ideales para lectores de pantalla, y cada respuesta también como <strong>nota de voz</strong>.</p>
+                        </div>
+                    </div>
+                    <figure class="phone-fig">
+                        <img src="img/chat-inicio.webp" alt="Bienvenida y menú principal de CompuFácil en el chat" loading="lazy" onclick="abrirImagen(this)">
+                        <figcaption>Bienvenida y menú principal</figcaption>
+                    </figure>
+                </div>
+            </main>
+        </div>
+        <a href="#chat" class="scroll-down" aria-label="Siguiente"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+    <!-- 6. ASÍ SE VE EN EL CHAT -->
+    <div id="chat" class="section-wrapper" data-title="En el chat">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>Así se ve en el chat</h1>
+                    <p>Conversaciones reales del bot · desliza para ver más</p>
+                </div>
+                <div><i class="fa-solid fa-comments" style="font-size: 34px; opacity: 0.8;"></i></div>
+            </header>
+
+            <main class="main-content" style="flex-direction: column; align-items: stretch;">
+                <div class="phone-strip" id="phoneStrip">
+                    <figure class="phone-fig">
+                        <img src="img/chat-tutor.webp" alt="El tutor IA explica para qué sirve la memoria RAM" loading="lazy" onclick="abrirImagen(this)">
+                        <figcaption><b>Tutor IA</b> · explica con analogías</figcaption>
+                    </figure>
+                    <figure class="phone-fig">
+                        <img src="img/chat-prueba.webp" alt="Pregunta de la prueba diagnóstica con su explicación" loading="lazy" onclick="abrirImagen(this)">
+                        <figcaption><b>Prueba diagnóstica</b> · explicación inmediata</figcaption>
+                    </figure>
+                    <figure class="phone-fig">
+                        <img src="img/chat-video.webp" alt="Videotutorial dentro del chat y mini reto" loading="lazy" onclick="abrirImagen(this)">
+                        <figcaption><b>Videotutorial</b> · ideas clave y mini reto</figcaption>
+                    </figure>
+                    <figure class="phone-fig">
+                        <img src="img/chat-voz.webp" alt="El estudiante pide un video por nota de voz y el bot responde con audio" loading="lazy" onclick="abrirImagen(this)">
+                        <figcaption><b>Por voz</b> · pide el video hablando</figcaption>
+                    </figure>
+                    <figure class="phone-fig">
+                        <img src="img/chat-opinion.webp" alt="El estudiante califica la herramienta y deja un comentario" loading="lazy" onclick="abrirImagen(this)">
+                        <figcaption><b>Opinión</b> · estrellas y comentario</figcaption>
+                    </figure>
+                </div>
+                <div class="strip-nav">
+                    <button onclick="moverTira(-1)" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button onclick="moverTira(1)" aria-label="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </main>
+        </div>
+        <a href="#accesible" class="scroll-down" aria-label="Siguiente"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+    <!-- 7. ACCESIBILIDAD Y VOZ -->
+    <div id="accesible" class="section-wrapper" data-title="Accesibilidad">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>Accesible para todos</h1>
+                    <p>Se puede usar hablando, escuchando y con lector de pantalla</p>
+                </div>
+                <div><i class="fa-solid fa-universal-access" style="font-size: 34px; opacity: 0.8;"></i></div>
+            </header>
+
+            <main class="main-content">
+                <div class="feature-layout">
+                    <div class="grid-2">
+                        <div class="info-card left">
+                            <div class="info-icon"><i class="fa-solid fa-microphone"></i></div>
+                            <h3>Habla en vez de escribir</h3>
+                            <p>Las notas de voz se transcriben con inteligencia artificial (Whisper) y el bot confirma lo que escuchó.</p>
+                            <div class="voice-sample"><span><i class="fa-solid fa-microphone"></i>"menú"</span><span><i class="fa-solid fa-microphone"></i>"opción tres"</span><span><i class="fa-solid fa-microphone"></i>"la be"</span></div>
+                        </div>
+                        <div class="info-card left">
+                            <div class="info-icon"><i class="fa-solid fa-volume-high"></i></div>
+                            <h3>Escucha las respuestas</h3>
+                            <p>Si el estudiante habla, el bot responde con una sola nota de voz que resume su turno, con voz neural en español de Colombia.</p>
+                        </div>
+                        <div class="info-card left">
+                            <div class="info-icon"><i class="fa-solid fa-spell-check"></i></div>
+                            <h3>Entiende lo aproximado</h3>
+                            <p>Tolera errores de escritura y de pronunciación y elige la opción más parecida; si duda entre dos, vuelve a preguntar.</p>
+                            <div class="voice-sample"><span>"prueva"</span><span>"tress"</span><span>"memoria ram" → video 2</span></div>
+                        </div>
+                        <div class="info-card left">
+                            <div class="info-icon"><i class="fa-solid fa-eye-low-vision"></i></div>
+                            <h3>Modo accesible</h3>
+                            <p>Textos limpios para lectores de pantalla y voz en cada respuesta. <span class="cmd">AUDIO</span> repite el último mensaje en voz alta.</p>
+                        </div>
+                    </div>
+                    <figure class="phone-fig">
+                        <img src="img/chat-voz.webp" alt="Conversación por notas de voz" loading="lazy" onclick="abrirImagen(this)">
+                        <figcaption>Pedir un video con la voz</figcaption>
+                    </figure>
+                </div>
+            </main>
+        </div>
+        <a href="#panel" class="scroll-down" aria-label="Siguiente"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+    <!-- 8. PANEL DEL DOCENTE -->
+    <div id="panel" class="section-wrapper" data-title="Panel docente">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>Panel para el docente</h1>
+                    <p>Todo lo que pasa en el chat, medido y en un solo lugar</p>
+                </div>
+                <div><i class="fa-solid fa-gauge" style="font-size: 34px; opacity: 0.8;"></i></div>
+            </header>
+
+            <main class="main-content panel-layout">
+                <div class="panel-tabs" role="tablist" id="panelTabs">
+                    <button class="active" data-img="resumen" data-cap="Estudiantes activos, preguntas al tutor, intentos de la prueba, videos vistos, satisfacción y el estado del cupo de la IA."><i class="fa-solid fa-chart-pie"></i> Resumen</button>
+                    <button data-img="comentarios" data-cap="Las opiniones de los estudiantes, con filtros y estados: nuevo, leído o resuelto."><i class="fa-solid fa-comment-dots"></i> Comentarios</button>
+                    <button data-img="prueba" data-cap="Aciertos por tema y las preguntas más difíciles: muestran qué reforzar en clase."><i class="fa-solid fa-clipboard-check"></i> Prueba</button>
+                    <button data-img="tutor" data-cap="Cada pregunta al tutor con su respuesta y la valoración 👍/👎 del estudiante."><i class="fa-solid fa-robot"></i> Tutor IA</button>
+                    <button data-img="contenido" data-cap="El docente administra los videos, el banco de preguntas y las respuestas sin IA, sin tocar código."><i class="fa-solid fa-sliders"></i> Contenido</button>
+                </div>
+                <figure class="panel-shot">
+                    <img id="panelImg" src="img/panel-resumen.webp" alt="Panel de CompuFácil: resumen" loading="lazy" onclick="abrirImagen(this)">
+                    <figcaption id="panelCap">Estudiantes activos, preguntas al tutor, intentos de la prueba, videos vistos, satisfacción y el estado del cupo de la IA.</figcaption>
+                </figure>
+                <p class="survey-note">Capturas con datos de demostración. Exporta todo a Excel (CSV) para los informes del proyecto.</p>
+            </main>
+        </div>
+        <a href="#contenido" class="scroll-down" aria-label="Siguiente"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+    <!-- 9. ADMINISTRAR EL CONTENIDO -->
+    <div id="contenido" class="section-wrapper" data-title="Contenido">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>El docente administra el contenido</h1>
+                    <p>Los cambios llegan al chat en segundos, sin reiniciar nada</p>
+                </div>
+                <div><i class="fa-solid fa-sliders" style="font-size: 34px; opacity: 0.8;"></i></div>
+            </header>
+
+            <main class="main-content" style="flex-direction: column;">
+                <div class="grid-3">
+                    <div class="info-card left">
+                        <div class="info-icon"><i class="fa-solid fa-film"></i></div>
+                        <h3>Videos <span class="tag-new">nuevo</span></h3>
+                        <p>Subir o reemplazar el MP4, verlo, cambiar título, tema, ideas clave y orden, o poner un enlace de YouTube si el archivo es muy pesado.</p>
+                    </div>
+                    <div class="info-card left">
+                        <div class="info-icon"><i class="fa-solid fa-list-check"></i></div>
+                        <h3>Banco de preguntas <span class="tag-new">nuevo</span></h3>
+                        <p>Agregar, editar o eliminar preguntas de la prueba y de los mini retos, con su respuesta correcta, explicación y porcentaje de acierto.</p>
+                    </div>
+                    <div class="info-card left">
+                        <div class="info-icon"><i class="fa-solid fa-life-ring"></i></div>
+                        <h3>Respuestas sin IA <span class="tag-new">nuevo</span></h3>
+                        <p>Si se agota el cupo de la IA o no hay internet, el tutor responde con estas respuestas por palabra clave. El docente las edita y las prueba ahí mismo.</p>
+                    </div>
+                </div>
+                <div class="grid-2" style="margin-top: 4px;">
+                    <figure class="panel-shot small">
+                        <img src="img/panel-contenido.webp" alt="Editor de videos del panel" loading="lazy" onclick="abrirImagen(this)">
+                        <figcaption>Editor de videos</figcaption>
+                    </figure>
+                    <figure class="panel-shot small">
+                        <img src="img/panel-sinia.webp" alt="Editor de respuestas sin IA con probador" loading="lazy" onclick="abrirImagen(this)">
+                        <figcaption>Respuestas sin IA, con probador</figcaption>
+                    </figure>
+                </div>
+            </main>
+        </div>
+        <a href="#arquitectura" class="scroll-down" aria-label="Siguiente"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+    <!-- 10. CÓMO FUNCIONA -->
+    <div id="arquitectura" class="section-wrapper" data-title="Cómo funciona">
+        <div class="slide-container">
+            <header class="header">
+                <div>
+                    <h1>¿Cómo funciona?</h1>
+                    <p>Del mensaje del estudiante a la respuesta, en segundos</p>
+                </div>
+                <div><i class="fa-solid fa-diagram-project" style="font-size: 34px; opacity: 0.8;"></i></div>
+            </header>
+
+            <main class="main-content" style="flex-direction: column; gap: 20px;">
+                <div class="arch">
+                    <div class="arch-node">
+                        <i class="fa-solid fa-user-graduate"></i>
+                        <h4>Estudiante</h4>
+                        <p>Escribe o envía una nota de voz desde su celular, sin instalar nada.</p>
+                    </div>
+                    <div class="arch-arrow"><i class="fa-solid fa-arrows-left-right"></i></div>
+                    <div class="arch-node">
+                        <i class="fa-brands fa-whatsapp"></i>
+                        <h4>Bot de WhatsApp</h4>
+                        <p>Node.js + WPPConnect. Maneja el menú, la prueba, los videos y la voz.</p>
+                    </div>
+                    <div class="arch-arrow"><i class="fa-solid fa-arrows-left-right"></i></div>
+                    <div class="arch-node core">
+                        <i class="fa-solid fa-server"></i>
+                        <h4>Servicio de IA y panel</h4>
+                        <p>Python + FastAPI. Memoria del tutor, datos y contenido.</p>
+                        <div class="arch-sub"><div><i class="fa-solid fa-database"></i> SQLite</div><div><i class="fa-solid fa-gauge"></i> Panel web</div></div>
+                    </div>
+                    <div class="arch-arrow"><i class="fa-solid fa-arrows-left-right"></i></div>
+                    <div class="arch-node">
+                        <i class="fa-solid fa-brain"></i>
+                        <h4>Inteligencia artificial</h4>
+                        <p>Groq: modelo GPT-OSS 120B para el tutor y Whisper para entender la voz.</p>
+                    </div>
+                </div>
+                <div class="pill-row">
+                    <div class="pill"><i class="fa-solid fa-power-off"></i><div><h4>Un solo clic</h4><p><b>CompuFacil.exe</b> enciende todo, revisa las dependencias y el cupo de la IA y abre el panel.</p></div></div>
+                    <div class="pill"><i class="fa-solid fa-life-ring"></i><div><h4>Siempre responde</h4><p>Si la IA no está disponible, el tutor usa respuestas de contingencia y el resto del bot sigue funcionando.</p></div></div>
+                    <div class="pill"><i class="fa-solid fa-shield-halved"></i><div><h4>Datos protegidos</h4><p>La información queda en el equipo de la institución; el panel tiene clave y muestra los números abreviados.</p></div></div>
+                </div>
+                <div class="tech-row">
+                    <span>Node.js</span><span>WPPConnect</span><span>Python</span><span>FastAPI</span><span>SQLite</span><span>Groq · GPT-OSS 120B</span><span>Whisper</span><span>Voz neural es-CO</span><span>Go (lanzador)</span>
+                </div>
+            </main>
+        </div>
+        <a href="#evidencias" class="scroll-down" aria-label="Siguiente"><i class="fa-solid fa-chevron-down"></i></a>
+    </div>
+
+    <!-- 11. EVIDENCIAS -->
+    <div id="evidencias" class="section-wrapper" data-title="Evidencias">
         <div class="slide-container">
             <header class="header">
                 <div>
@@ -550,9 +999,15 @@
             <main class="main-content">
                 <div class="split-content">
                     <div class="split-card">
-                        <div class="info-icon"><i class="fa-solid fa-comments"></i></div>
-                        <h3>Prototipo Funcional</h3>
-                        <p>El chatbot ya está en funcionamiento y disponible por WhatsApp. Responde con procesamiento de lenguaje natural, ofrece retroalimentación inmediata y guía al estudiante paso a paso. <strong>Lo verán funcionando en vivo</strong> al cierre de esta presentación.</p>
+                        <div class="info-icon"><i class="fa-solid fa-circle-check"></i></div>
+                        <h3>Producto Funcional</h3>
+                        <ul class="bullet-list">
+                            <li>Chatbot en WhatsApp con tutor IA que recuerda la conversación.</li>
+                            <li>Videotutoriales, prueba diagnóstica, progreso y opinión dentro del chat.</li>
+                            <li>Notas de voz de ida y vuelta, modo accesible y comprensión de palabras aproximadas.</li>
+                            <li>Panel web para seguir el uso y administrar videos, preguntas y respuestas.</li>
+                        </ul>
+                        <p style="margin-top:6px"><strong>Lo verán funcionando en vivo</strong> al cierre de esta presentación.</p>
                     </div>
                     <div class="split-card">
                         <div class="info-icon"><i class="fa-solid fa-folder-open"></i></div>
@@ -570,11 +1025,11 @@
                 </div>
             </main>
         </div>
-        <a href="#cierre" class="scroll-down"><i class="fa-solid fa-chevron-down"></i></a>
+        <a href="#cierre" class="scroll-down" aria-label="Siguiente"><i class="fa-solid fa-chevron-down"></i></a>
     </div>
 
-    <!-- SECCIÓN 6: CIERRE — QR Y DEMO EN VIVO -->
-    <div id="cierre" class="section-wrapper">
+    <!-- 12. CIERRE — QR Y DEMO EN VIVO -->
+    <div id="cierre" class="section-wrapper" data-title="Pruébalo">
         <div class="slide-container">
             <header class="header">
                 <div>
@@ -596,22 +1051,29 @@
                     <div class="step-card">
                         <div class="step-icon"><i class="fa-brands fa-whatsapp"></i></div>
                         <div class="step-text">
-                            <h3>Paso 1: Interacción Inicial</h3>
-                            <p>Escribe la palabra <span class="cmd">HOLA</span></p>
-                        </div>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-icon"><i class="fa-solid fa-brain"></i></div>
-                        <div class="step-text">
-                            <h3>Paso 2: Evaluación Piloto</h3>
-                            <p>Envía la opción <span class="cmd">2</span> en el menú</p>
+                            <h3>Paso 1: Saluda</h3>
+                            <p>Escribe <span class="cmd">HOLA</span> y verás el menú</p>
                         </div>
                     </div>
                     <div class="step-card">
                         <div class="step-icon"><i class="fa-solid fa-robot"></i></div>
                         <div class="step-text">
-                            <h3>Paso 3: Microaprendizaje</h3>
-                            <p>Responde y recibe feedback</p>
+                            <h3>Paso 2: Pregúntale al tutor</h3>
+                            <p>Envía <span class="cmd">1</span> y pregunta, por ejemplo, «¿qué es la RAM?»</p>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+                        <div class="step-text">
+                            <h3>Paso 3: Mide lo que sabes</h3>
+                            <p>Escribe <span class="cmd">MENU</span> y luego <span class="cmd">3</span> para la prueba diagnóstica</p>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-icon"><i class="fa-solid fa-microphone"></i></div>
+                        <div class="step-text">
+                            <h3>Paso 4: Usa tu voz</h3>
+                            <p>Envía una nota de voz diciendo «videos» y te responde con audio</p>
                         </div>
                     </div>
                 </div>
@@ -632,7 +1094,7 @@
                 </div>
             </footer>
         </div>
-        <a href="#problema" class="scroll-down" style="transform: translateX(-50%) rotate(180deg);"><i class="fa-solid fa-chevron-down"></i></a>
+        <a href="#problema" class="scroll-down" style="transform: translateX(-50%) rotate(180deg);" aria-label="Volver al inicio"><i class="fa-solid fa-chevron-down"></i></a>
     </div>
 
 </div>
@@ -646,20 +1108,27 @@
     </div>
 </div>
 
+<!-- MODAL: IMAGEN AMPLIADA -->
+<div id="modalImagen" class="modal img-modal" onclick="cerrarImagen()">
+    <span class="close-btn img-close" onclick="cerrarImagen()">&times;</span>
+    <img id="modalImagenSrc" alt="">
+</div>
+
 <script>
-    // Tema claro / oscuro
-    function toggleTheme() {
+    // Tema claro / oscuro (se recuerda en este navegador)
+    function aplicarTema(oscuro) {
         const html = document.documentElement;
         const icon = document.getElementById('themeIcon');
-        html.classList.toggle('dark-mode');
-        if (html.classList.contains('dark-mode')) {
-            icon.classList.remove('fa-sun');
-            icon.classList.add('fa-moon');
-        } else {
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
-        }
+        html.classList.toggle('dark-mode', oscuro);
+        icon.classList.toggle('fa-sun', !oscuro);
+        icon.classList.toggle('fa-moon', oscuro);
     }
+    function toggleTheme() {
+        const oscuro = !document.documentElement.classList.contains('dark-mode');
+        aplicarTema(oscuro);
+        try { localStorage.setItem('cf_tema', oscuro ? 'oscuro' : 'claro'); } catch (_) {}
+    }
+    try { if (localStorage.getItem('cf_tema') === 'oscuro') aplicarTema(true); } catch (_) {}
 
     // Ampliar gráfica de la encuesta
     function abrirGrafico() {
@@ -672,19 +1141,72 @@
         body.appendChild(clone);
         document.getElementById('modalGrafico').classList.add('show');
     }
-
-    function cerrarGrafico() {
-        document.getElementById('modalGrafico').classList.remove('show');
-    }
-
-    function cerrarModalFondo(evento) {
-        if (evento.target.id === 'modalGrafico') {
-            cerrarGrafico();
-        }
-    }
-
-    document.getElementById('chartCard').addEventListener('keypress', function(e) {
+    function cerrarGrafico() { document.getElementById('modalGrafico').classList.remove('show'); }
+    function cerrarModalFondo(evento) { if (evento.target.id === 'modalGrafico') cerrarGrafico(); }
+    document.getElementById('chartCard').addEventListener('keypress', function (e) {
         if (e.key === 'Enter' || e.key === ' ') abrirGrafico();
+    });
+
+    // Ampliar imágenes
+    function abrirImagen(img) {
+        const m = document.getElementById('modalImagen');
+        const big = document.getElementById('modalImagenSrc');
+        big.src = img.src; big.alt = img.alt;
+        m.classList.add('show');
+    }
+    function cerrarImagen() { document.getElementById('modalImagen').classList.remove('show'); }
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { cerrarImagen(); cerrarGrafico(); }
+    });
+
+    // Galería del panel
+    document.getElementById('panelTabs').addEventListener('click', function (e) {
+        const b = e.target.closest('button[data-img]');
+        if (!b) return;
+        this.querySelectorAll('button').forEach(function (x) { x.classList.toggle('active', x === b); });
+        const img = document.getElementById('panelImg');
+        img.src = 'img/panel-' + b.dataset.img + '.webp';
+        img.alt = 'Panel de CompuFácil: ' + b.textContent.trim();
+        document.getElementById('panelCap').textContent = b.dataset.cap;
+    });
+    // Precarga de las capturas del panel
+    ['comentarios', 'prueba', 'tutor', 'contenido'].forEach(function (n) { const i = new Image(); i.src = 'img/panel-' + n + '.webp'; });
+
+    // Tira de pantallas del chat
+    function moverTira(dir) {
+        const s = document.getElementById('phoneStrip');
+        const f = s.querySelector('.phone-fig');
+        s.scrollBy({ left: dir * (f ? f.offsetWidth + 18 : 300), behavior: 'smooth' });
+    }
+
+    // Puntos de navegación y teclado
+    const secciones = Array.from(document.querySelectorAll('.section-wrapper'));
+    const dots = document.getElementById('dots');
+    secciones.forEach(function (s) {
+        const a = document.createElement('a');
+        a.href = '#' + s.id;
+        a.setAttribute('aria-label', s.dataset.title);
+        a.innerHTML = '<span>' + s.dataset.title + '</span>';
+        dots.appendChild(a);
+    });
+    const obs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+            if (en.isIntersecting) {
+                const i = secciones.indexOf(en.target);
+                dots.querySelectorAll('a').forEach(function (a, j) { a.classList.toggle('active', j === i); });
+            }
+        });
+    }, { threshold: 0.55 });
+    secciones.forEach(function (s) { obs.observe(s); });
+    document.addEventListener('keydown', function (e) {
+        if (document.querySelector('.modal.show')) return;
+        if (!['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp'].includes(e.key)) return;
+        const actual = dots.querySelector('a.active');
+        let i = actual ? Array.from(dots.children).indexOf(actual) : 0;
+        i += (e.key === 'ArrowDown' || e.key === 'PageDown') ? 1 : -1;
+        if (i < 0 || i >= secciones.length) return;
+        e.preventDefault();
+        secciones[i].scrollIntoView({ behavior: 'smooth' });
     });
 </script>
 

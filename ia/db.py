@@ -112,6 +112,10 @@ def init_db() -> None:
         cols = [r[1] for r in conn.execute("PRAGMA table_info(quiz_answers)").fetchall()]
         if "question" not in cols:
             conn.execute("ALTER TABLE quiz_answers ADD COLUMN question TEXT")
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS content ("
+            "key TEXT PRIMARY KEY, data TEXT NOT NULL, updated_at TEXT NOT NULL)"
+        )
         conn.commit()
     _import_legacy_history()
 
@@ -407,6 +411,36 @@ def admin_users() -> list[dict]:
         "(SELECT COUNT(*) FROM feedback f WHERE f.user_id=u.id) AS feedback "
         "FROM users u ORDER BY u.last_seen DESC"
     )
+
+
+# ---------------------------------------------------------------------------
+# Contenido administrable (videos, banco de preguntas, respuestas sin IA)
+# ---------------------------------------------------------------------------
+
+def get_content(key: str):
+    row = get_conn().execute("SELECT data FROM content WHERE key=?", (key,)).fetchone()
+    return json.loads(row[0]) if row else None
+
+
+def set_content(key: str, data, only_if_missing: bool = False) -> bool:
+    conn = get_conn()
+    with _lock:
+        if only_if_missing and conn.execute("SELECT 1 FROM content WHERE key=?", (key,)).fetchone():
+            return False
+        conn.execute(
+            "INSERT INTO content(key, data, updated_at) VALUES (?,?,?) "
+            "ON CONFLICT(key) DO UPDATE SET data=excluded.data, updated_at=excluded.updated_at",
+            (key, json.dumps(data, ensure_ascii=False), now()),
+        )
+        conn.commit()
+    return True
+
+
+def content_version() -> str:
+    import hashlib
+
+    rows = get_conn().execute("SELECT key, data FROM content ORDER BY key").fetchall()
+    return hashlib.md5("|".join(f"{k}={d}" for k, d in rows).encode("utf-8")).hexdigest()[:12]
 
 
 EXPORTS = {

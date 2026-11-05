@@ -25,6 +25,8 @@ async function safe(promise, label) {
 }
 
 module.exports = {
+  content: () => safe(http.get('/api/content'), 'content'),
+  seedContent: (data) => safe(http.post('/api/content/seed', data, { timeout: 15000 }), 'seed'),
   BASE_URL,
   chat: (phone, message, name) =>
     http.post('/api/chat', { phone, message, name }, { timeout: 40000 }).then((r) => r.data),

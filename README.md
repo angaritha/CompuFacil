@@ -1,51 +1,95 @@
-# CompuFácil 🖥️ — Chatbot educativo de hardware en WhatsApp
+# CompuFácil 🖥️ — Tutor de hardware en WhatsApp
 
 CompuFácil acompaña a estudiantes de primer semestre de Ingeniería de Sistemas
-de la Fundación Universitaria San Mateo en los fundamentos de hardware:
-resuelve dudas con IA, envía videotutoriales, aplica una prueba diagnóstica,
-muestra el progreso y recoge la opinión de los estudiantes. Todo se puede
-seguir desde un panel web.
+de la **Fundación Universitaria San Mateo** en los fundamentos de hardware.
+Desde WhatsApp, sin instalar nada, el estudiante puede:
+- resolver dudas con un tutor de inteligencia artificial;
+- ver videotutoriales cortos;
+- presentar una prueba diagnóstica;
+- seguir su progreso;
+- dejar su opinión.
+
+Puede escribir o hablar. El docente sigue todo desde un panel web, y desde ahí
+también administra los videos, las preguntas y las respuestas del bot.
+
+🌐 **Presentación del proyecto:** https://angaritha.github.io/CompuFacil/
+
+<p align="center">
+  <img src="img/chat-inicio.webp" width="200" alt="Bienvenida y menú">
+  <img src="img/chat-tutor.webp" width="200" alt="Tutor IA">
+  <img src="img/chat-prueba.webp" width="200" alt="Prueba diagnóstica">
+  <img src="img/chat-voz.webp" width="200" alt="Uso por voz">
+</p>
 
 ## Qué hace
 
 | Opción del menú | Función |
 |---|---|
-| 1 · 🤖 Tutor IA | Responde preguntas de hardware y **recuerda la conversación**. *NUEVO* empieza otro tema; 👍/👎 califican la respuesta. |
-| 2 · 🎬 Videotutoriales | 8 temas. El video llega **dentro del chat** con sus ideas clave y un **mini reto** (*R*). |
-| 3 · 📝 Prueba diagnóstica | 5 preguntas al azar (banco de 20, temas distintos), explicación inmediata y videos recomendados según lo que falló. |
-| 4 · 📊 Mi progreso | Intentos, promedio, tendencia, temas por reforzar, videos vistos y preguntas hechas. |
-| 5 · 💬 Opinión | Calificación de 1 a 5, categoría y comentario libre. |
+| 1 · 🤖 Tutor IA | Responde preguntas de hardware con analogías y **recuerda la conversación**. *NUEVO* empieza otro tema; 👍/👎 califican la respuesta. |
+| 2 · 🎬 Videotutoriales | 8 temas, del procesador al ensamble. El video llega **dentro del chat** con sus ideas clave y un **mini reto** (*R*). |
+| 3 · 📝 Prueba diagnóstica | 5 preguntas al azar de un banco de 20, de temas distintos. Explica cada respuesta en el momento y al final recomienda videos según lo que falló. |
+| 4 · 📊 Mi progreso | Intentos, promedio, tendencia, temas por reforzar, videos vistos y preguntas hechas al tutor. |
+| 5 · 💬 Opinión | Calificación de 1 a 5 estrellas, categoría y comentario libre. |
 | 6 · ℹ️ Ayuda | Instrucciones y comandos. |
-| 7 · ♿ Modo accesible | Mensajes sin emojis ni adornos (mejor para lectores de pantalla) y cada respuesta también en **nota de voz**. |
+| 7 · ♿ Modo accesible | Mensajes sin emojis ni adornos, pensados para lectores de pantalla, y cada respuesta también en **nota de voz**. |
 
-**Accesibilidad por voz**
-- El estudiante puede enviar **notas de voz** en cualquier momento: se transcriben con Whisper (Groq) y se procesan como texto (sirve decir "uno", "la be", "menú"…).
-- *AUDIO* envía en voz alta el último mensaje del bot.
-- *ACCESIBLE* / *NORMAL* activan o desactivan el modo accesible (se recuerda por estudiante).
-- La voz es neural en español de Colombia (edge-tts), con gTTS como respaldo.
+### 🎙️ Voz y accesibilidad
+- **Notas de voz en cualquier momento.** Se transcriben con Whisper (Groq) y el bot confirma lo que escuchó («🎧 Escuché: …»). Sirve decir "menú", "opción tres", "la be"…
+- **Respuesta en audio.** Si el estudiante habla, el bot contesta con **una sola nota de voz** que resume todo su turno. Usa voz neural en español de Colombia (edge-tts) y, si esa falla, gTTS.
+- **Entiende palabras aproximadas.** Tolera errores de escritura y de pronunciación y elige la opción más parecida: "prueva", "tress", "memoria ram" → video 2, "excelente" → 5 estrellas. Si duda entre dos opciones, vuelve a preguntar.
+- **Comandos de voz y lectura.**
+  - *AUDIO* lee en voz alta el último mensaje.
+  - *ACCESIBLE* y *NORMAL* activan o desactivan el modo accesible, que se recuerda por estudiante.
 
-**Panel web** (`http://localhost:8000/panel`): resumen de uso, comentarios
-(con estados nuevo/leído/resuelto), resultados de la prueba por tema y por
-pregunta, preguntas al tutor con sus respuestas y valoraciones, videos más
-vistos, usuarios y **exportación a Excel (CSV)** para el informe.
+### 📊 Panel web para el docente
+Se abre en `http://localhost:8000/panel` y pide clave. Tiene estas pestañas:
+
+| Pestaña | Qué muestra |
+|---|---|
+| **Resumen** | Indicadores de uso, actividad diaria, opciones más usadas, satisfacción y **estado de la IA** (si la clave funciona y cuánto cupo queda). |
+| **Comentarios** | Las opiniones de los estudiantes, con filtros y estados *nuevo / leído / resuelto*. |
+| **Prueba diagnóstica** | Aciertos por tema, preguntas más difíciles e intentos. |
+| **Tutor IA** | Cada pregunta con su respuesta y su valoración 👍/👎; se puede filtrar por las que se respondieron sin IA. |
+| **Videos y Usuarios** | Reproducciones por video y actividad de cada estudiante. |
+| **Contenido del bot** 🆕 | El docente administra el contenido sin tocar código (ver la tabla siguiente). |
+
+En **Contenido del bot** se puede:
+
+| Sección | Qué permite |
+|---|---|
+| **Videos** | Subir, reemplazar, ver o quitar el MP4. Cambiar título, tema, ideas clave, palabras para pedirlo y orden. Poner un enlace de YouTube como respaldo. |
+| **Banco de preguntas** | Agregar, editar o eliminar preguntas de la prueba y de los mini retos, con respuesta correcta, explicación y porcentaje de acierto. |
+| **Respuestas sin IA** | Las respuestas por palabra clave que usa el tutor cuando se agota el cupo de la IA o no hay internet. Tiene un **probador** para ver qué respondería el bot. |
+
+Los cambios llegan al bot en menos de 30 segundos, sin reiniciarlo. Todo se
+puede **exportar a Excel (CSV)** para los informes.
+
+<p align="center">
+  <img src="img/panel-resumen.webp" width="49%" alt="Panel: resumen">
+  <img src="img/panel-contenido.webp" width="49%" alt="Panel: editor de videos">
+</p>
+<p align="center"><sub>Capturas con datos de demostración.</sub></p>
 
 ## Arquitectura
 
 ```
-WhatsApp ⇄ bot/ (Node.js + wppconnect) ──HTTP──▶ ia/ (Python + FastAPI) ──▶ Groq (IA)
-                                                     │
-                                                     ├─ compufacil.db (SQLite)
-                                                     └─ /panel (panel web)
+                      ┌──────────────────────────────────────────┐
+WhatsApp ⇄ bot/ (Node.js + WPPConnect) ⇄ ia/ (Python + FastAPI) ⇄ Groq
+  texto y               menú, prueba,      tutor con memoria,      ├─ GPT-OSS 120B (tutor)
+  notas de voz          videos, voz,       datos (SQLite),         └─ Whisper (voz → texto)
+                        contenido en vivo  panel web, voz (TTS)
 ```
 
 ```
 CompuFacil/
-├── CompuFacil.exe          ← doble clic para arrancar todo (Windows)
+├── CompuFacil.exe           ← doble clic para arrancar todo (Windows)
 ├── iniciar_compufacil.bat   alternativa en dos ventanas
+├── index.html, img/         página de presentación (GitHub Pages)
 ├── launcher/                código del lanzador (Go)
 ├── ia/
 │   ├── main.py              API + panel
-│   ├── ia_service.py        Tutor IA (Groq) con respaldo local
+│   ├── ia_service.py        Tutor IA (Groq), respuestas sin IA y estado del cupo
+│   ├── content_admin.py     Contenido administrable (videos, preguntas, respuestas)
 │   ├── db.py                Base de datos SQLite
 │   ├── voice.py             Notas de voz: transcripción y síntesis
 │   ├── panel.html           Panel web
@@ -53,17 +97,21 @@ CompuFacil/
 │   └── .env.example         Plantilla del .env
 └── bot/
     ├── bot.js               Conexión con WhatsApp
-    ├── flows.js             Conversación (menú, tutor, videos, prueba, opinión)
-    ├── content.js           Contenido: temas, videos y banco de preguntas
+    ├── flows.js             Conversación (menú, tutor, videos, prueba, opinión, voz)
+    ├── intent.js            Interpretación de palabras aproximadas
+    ├── content.js           Contenido de fábrica (temas, videos, banco de preguntas)
+    ├── contentSync.js       Aplica en vivo los cambios hechos en el panel
     ├── api.js / state.js    Comunicación con la API y estado por usuario
-    ├── assets/videos/       Aquí van los MP4 (ver LEEME.md)
+    ├── assets/videos/       MP4 de los videotutoriales
     └── test/                Simulaciones sin WhatsApp
 ```
 
 ## Instalación (una sola vez)
 
-Requisitos: **Node.js 18+**, **Python 3.10+** y una clave de **Groq**
-(https://console.groq.com).
+Requisitos:
+- **Node.js 18+**
+- **Python 3.10+**
+- una clave gratuita de **Groq** (https://console.groq.com/keys)
 
 ```bash
 # Motor de IA
@@ -77,82 +125,80 @@ cd ../bot
 npm install
 ```
 
-Crea `ia/.env` a partir de `ia/.env.example` y pon tu `GROQ_API_KEY` y una
-`PANEL_PASSWORD` propia.
+Crea `ia/.env` a partir de `ia/.env.example`. Allí pon tu `GROQ_API_KEY` y, si
+quieres, una `PANEL_PASSWORD` propia (por defecto `compu2026`).
 
 ## Uso diario
 
 **Doble clic en `CompuFacil.exe`.** En una sola ventana:
 
-1. Revisa e instala las dependencias (solo cuando cambian).
+1. Revisa las dependencias e instala solo lo que cambió.
 2. Enciende el motor de IA y el panel.
 3. Comprueba la clave de Groq y cuánto cupo gratuito queda hoy.
-4. Conecta el bot de WhatsApp (si aparece un QR, escanéalo).
+4. Conecta el bot de WhatsApp. La primera vez aparece un QR: escanéalo desde WhatsApp → *Dispositivos vinculados*.
 5. Abre el panel en el navegador.
 
-Para apagar todo, cierra la ventana o presiona Ctrl+C. Los registros
-completos quedan en `logs/` (`ia.log`, `bot.log`, `setup.log`).
-
-`iniciar_compufacil.bat` sigue disponible como alternativa (abre dos ventanas).
+Para apagar todo, cierra la ventana o presiona Ctrl+C. Los registros completos
+quedan en `logs/`. La sesión de WhatsApp se guarda en `bot/tokens/`.
 
 **Manual:**
 
 ```bash
-# Terminal 1
-cd ia && python main.py
-# Terminal 2 (cuando la anterior diga "Uvicorn running")
-cd bot && node bot.js
+cd ia && python main.py      # terminal 1
+cd bot && node bot.js        # terminal 2, cuando la anterior diga "Uvicorn running"
 ```
-
-La primera vez, escanea el QR desde WhatsApp → *Dispositivos vinculados*. La
-sesión queda guardada en `bot/tokens/`.
 
 ### Cupo de la IA (Groq)
 
 El plan gratuito de Groq no se paga ni se recarga: tiene límites que se
-recuperan solos. Para el modelo del tutor (`openai/gpt-oss-120b`) son unas
-**1.000 preguntas al día** y **8.000 tokens por minuto**; para las notas de voz
-(Whisper) unas **2.000 transcripciones al día**. El límite diario funciona como
-una ventana de 24 horas. El lanzador y el panel (*Resumen*) muestran si la clave
-funciona y cuántas solicitudes quedan. Si el cupo se agota, el tutor responde
-con contenido local hasta que se libere.
+recuperan solos, en una ventana de 24 horas.
+
+| Uso | Límite aproximado |
+|---|---|
+| Tutor (`openai/gpt-oss-120b`) | 1.000 preguntas al día y 8.000 tokens por minuto |
+| Notas de voz (Whisper) | 2.000 transcripciones al día |
+
+El lanzador y el panel muestran el cupo restante. Si se agota, el tutor usa las
+**respuestas sin IA**, que se editan en el panel.
 
 ## Personalizar el contenido
 
-- **Videos:** copia los MP4 en `bot/assets/videos/` con los nombres de `LEEME.md`.
-- **Preguntas, temas, títulos de los videos:** `bot/content.js`.
-- **Personalidad del tutor:** `SYSTEM_PROMPT` en `ia/ia_service.py`.
+Lo normal es hacerlo desde el **panel → Contenido del bot**: videos, preguntas y
+respuestas sin IA.
+
+| Qué cambiar | Dónde |
+|---|---|
+| Valores de fábrica, que se cargan la primera vez | `bot/content.js` |
+| Personalidad del tutor | `SYSTEM_PROMPT` en `ia/ia_service.py` |
+| Voz | `TTS_VOICE` en `ia/.env` |
 
 ## Probar sin WhatsApp
 
 Con el servicio de IA encendido:
 
 ```bash
-cd bot && npm test
+cd bot && npm test            # conversación completa simulada
+node test/sim_voice2.js       # audios y palabras aproximadas
 ```
-
-Simula una conversación completa (tutor, videos, prueba, progreso y opinión) y
-la imprime en la consola. Los datos aparecen en el panel.
 
 ## Solución de problemas
 
 | Síntoma | Solución |
 |---|---|
-| El lanzador dice "clave no válida" | Crea otra clave en https://console.groq.com/keys y ponla en `ia/.env` (`GROQ_API_KEY=...`). |
-| Windows avisa "protegió su PC" al abrir el .exe | Clic en *Más información* → *Ejecutar de todas formas* (el .exe no está firmado digitalmente). |
-| "El Tutor IA no está disponible" | Verifica que la ventana de IA esté abierta y que `http://localhost:8000/health` responda. |
-| El tutor responde con textos genéricos | Groq alcanzó su límite gratuito o la clave falló; revisa la ventana de IA. Se recupera solo. |
-| El QR no aparece o expira | Cierra el bot, borra `bot/tokens/` y vuelve a iniciarlo. |
-| No llega el video | Revisa el nombre del archivo y que pese menos de 16 MB. |
-| No llegan las notas de voz del bot | Ejecuta `pip install -r requirements.txt` en `ia/` (el .bat lo hace solo) y revisa que haya internet. |
-| El panel pide clave | Es la `PANEL_PASSWORD` de `ia/.env` (por defecto `compu2026`). |
+| El lanzador dice "clave no válida" | Crea otra clave en https://console.groq.com/keys y ponla en `ia/.env`. |
+| El tutor responde con textos genéricos | Se agotó el cupo de Groq o no hay internet; se recupera solo. Mientras tanto edita las *Respuestas sin IA* en el panel. |
+| El QR no aparece o expira | Cierra CompuFácil, borra `bot/tokens/` y vuelve a abrirlo. |
+| No llega el video | El MP4 debe pesar menos de 16 MB. Si pesa más, comprímelo o usa un enlace de YouTube en el panel. |
+| No llegan las notas de voz del bot | Vuelve a abrir `CompuFacil.exe`, que actualiza las dependencias, y revisa el internet. |
+| "Contenido del bot" aparece vacío | Enciende el bot una vez: carga los videos y preguntas de fábrica. |
+| Windows avisa "protegió su PC" | *Más información* → *Ejecutar de todas formas*. El .exe no está firmado digitalmente. |
 
-## Notas
+## Privacidad
 
-- El historial de la versión anterior (`bot/quiz_history.json`) se importa automáticamente la primera vez.
-- Los datos de los estudiantes quedan solo en tu PC (`ia/compufacil.db`); el panel muestra los números abreviados.
-- El bot usa WhatsApp Web (wppconnect); funciona mientras el PC esté encendido y conectado.
+- Los datos de los estudiantes quedan solo en el equipo (`ia/compufacil.db`).
+- El panel exige clave y muestra los números de teléfono abreviados.
+- `.gitignore` excluye la base de datos, la sesión de WhatsApp, los videos y las claves.
 
 ---
-Proyecto de la Especialización en Docencia · Fundación Universitaria San Mateo ·
-Juan Felipe Angarita Cepeda y Luis Miguel Umaña Suárez.
+Proyecto integrador de la Especialización en Docencia · Fundación Universitaria
+San Mateo · Juan Felipe Angarita Cepeda y Luis Miguel Umaña Suárez.

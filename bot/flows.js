@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const api = require('./api');
 const store = require('./state');
-const { TOPICS, TUTORIALS, QUIZ } = require('./content');
+const { TOPICS, TUTORIALS, QUIZ, QUESTION_ARCHIVE } = require('./content');
 const intent = require('./intent');
 
 const QUIZ_LENGTH = 5;
@@ -146,7 +146,7 @@ function pickQuizSet(count = QUIZ_LENGTH) {
   return picked;
 }
 
-const questionById = (id) => QUIZ.find((q) => q.id === id);
+const questionById = (id) => QUIZ.find((q) => q.id === id) || QUESTION_ARCHIVE.get(id);
 const tutorialById = (id) => TUTORIALS.find((t) => t.id === id);
 const tutorialNumber = (id) => TUTORIALS.findIndex((t) => t.id === id) + 1;
 
@@ -350,7 +350,7 @@ async function sendTutorial(client, phone, st, tut) {
 
 async function startMiniChallenge(client, phone, st) {
   const tut = tutorialById(st.tutorial);
-  let pool = QUIZ.filter((q) => tut && q.topic === tut.id);
+  let pool = QUIZ.filter((q) => tut && q.topic === (tut.topic || tut.id));
   if (pool.length === 0) pool = QUIZ;
   const q = shuffle(pool.filter((x) => x.id !== st.lastChallenge))[0] || pool[0];
   st.step = 'MINI_CHALLENGE';
@@ -499,16 +499,19 @@ async function handleMessage(baseClient, message) {
   }
 }
 
-const TUTORIAL_PHRASES = {
-  1: ['procesador', 'cpu', 'microprocesador'],
-  2: ['memoria ram', 'ram', 'memoria'],
-  3: ['almacenamiento', 'disco duro', 'ssd', 'hdd', 'disco'],
-  4: ['placa madre', 'tarjeta madre', 'motherboard', 'placa base'],
-  5: ['tarjeta grafica', 'grafica', 'gpu', 'tarjeta de video'],
-  6: ['fuente de poder', 'fuente', 'fuente de alimentacion'],
-  7: ['perifericos', 'puertos', 'usb'],
-  8: ['ensamble', 'armar un pc', 'armar computador', 'ensamblar'],
-};
+/** Frases para pedir cada video por su nombre: palabras clave, título y sus palabras únicas. */
+function tutorialPhrases() {
+  const STOP = new Set(['video', 'videos', 'parte', 'paso', 'pasos', 'sobre', 'entre', 'como', 'tarjeta', 'memoria']);
+  const titles = TUTORIALS.map((t) => intent.norm(t.title).replace(/^(el|la|los|las)\s+/, ''));
+  const count = {};
+  titles.forEach((t) => new Set(t.split(' ')).forEach((w) => { count[w] = (count[w] || 0) + 1; }));
+  const out = {};
+  TUTORIALS.forEach((t, i) => {
+    const words = titles[i].split(' ').filter((w) => w.length >= 5 && !STOP.has(w) && count[w] === 1);
+    out[i + 1] = [...(t.keywords || []).map((k) => intent.norm(k)), titles[i], ...words].filter(Boolean);
+  });
+  return out;
+}
 
 const MENU_PHRASES = {
   1: ['tutor', 'tutor ia', 'inteligencia artificial', 'preguntar', 'hacer una pregunta'],
@@ -705,7 +708,7 @@ async function route(client, phone, st, raw, text) {
       }
       let n = intent.extractNumber(text, 5);
       if (!(n >= 1 && n <= TUTORIALS.length)) {
-        const p = intent.pick(text, TUTORIAL_PHRASES, 0.8);
+        const p = intent.pick(text, tutorialPhrases(), 0.8);
         n = p ? parseInt(p.value, 10) : null;
       }
       if (n >= 1 && n <= TUTORIALS.length) {

@@ -1,8 +1,11 @@
 # Videos de los tutoriales
 
-Coloca aquí los videos con **exactamente** estos nombres. El bot los envía
-automáticamente dentro del chat; si un archivo no existe, muestra las ideas
-clave y el aviso "video en producción".
+**Lo más fácil:** súbelos desde el panel (`http://localhost:8000/panel` →
+*Contenido del bot* → *Videos* → *Subir MP4*). Ahí también cambias el título,
+el tema, las ideas clave, el orden o pones un enlace de YouTube.
+
+Si prefieres copiarlos a mano, déjalos en esta carpeta con estos nombres (son
+los de fábrica; el panel muestra el nombre que espera cada video):
 
 | N.º en el bot | Archivo | Tema |
 |---|---|---|
@@ -15,6 +18,9 @@ clave y el aviso "video en producción".
 | 7 | `07-perifericos.mp4` | Periféricos y puertos |
 | 8 | `08-ensamble.mp4` | Arma un PC paso a paso |
 
+Si un video no tiene archivo ni enlace, el bot muestra las ideas clave y avisa
+"video en producción".
+
 ## Recomendaciones para que se vean bien en WhatsApp
 
 - Formato **MP4 (H.264 + AAC)**.
@@ -22,5 +28,4 @@ clave y el aviso "video en producción".
 - Peso máximo **16 MB** (720p o incluso 480p es suficiente para el celular).
 - Formato vertical (9:16) o cuadrado se ve mejor en el celular.
 
-Para cambiar títulos, ideas clave o agregar un enlace de YouTube de respaldo,
-edita `bot/content.js` (sección TUTORIALS, campo `url`).
+Los MP4 no se suben a GitHub (están en `.gitignore`).

@@ -30,3 +30,9 @@ Thumbs.db
 # Lanzador
 logs/
 .compufacil/
+
+# Historial de la versión anterior (datos de estudiantes)
+bot/quiz_history.json
+
+# Subidas de video a medio terminar
+*.subiendo

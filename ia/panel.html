@@ -47,7 +47,7 @@
   section.view { display: none; }
   section.view.active { display: block; }
   .grid { display: grid; gap: 16px; }
-  .kpis { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-bottom: 16px; }
+  .kpis { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-bottom: 16px; }
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; box-shadow: var(--shadow); }
   .kpi .label { color: var(--ink-2); font-size: 13px; }
   .kpi .value { font-size: 30px; font-weight: 700; letter-spacing: -.5px; margin-top: 4px; }
@@ -66,7 +66,7 @@
   .col .stick { width: 100%; max-width: 26px; background: var(--bar); border-radius: 4px 4px 0 0; min-height: 2px; }
   .col:hover .stick { opacity: .75; }
   .col-labels { display: flex; gap: 4px; font-size: 11px; color: var(--muted); margin-top: 6px; }
-  .col-labels span { flex: 1; text-align: center; overflow: hidden; }
+  .col-labels span { flex: 1; text-align: center; overflow: visible; white-space: nowrap; }
   .tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; padding: 6px 9px; border-radius: 6px; opacity: 0; transition: opacity .1s; z-index: 50; }
   .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
   .toolbar input, .toolbar select { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
@@ -99,6 +99,42 @@
   #login .card { width: 100%; max-width: 380px; text-align: center; }
   #login input { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; margin: 14px 0 10px; background: var(--surface); color: var(--ink); }
   #login .err { color: var(--bad); font-size: 13px; min-height: 18px; }
+  [hidden] { display: none !important; }
+  /* ---- Contenido administrable ---- */
+  .subtabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .subtabs button.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .savebar { position: sticky; top: 112px; z-index: 4; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; margin-bottom: 14px; }
+  .savebar .grow { flex: 1; min-width: 200px; color: var(--ink-2); font-size: 13px; }
+  .savebar .dirty { color: var(--warn); font-weight: 600; }
+  .savebar .err { color: var(--bad); font-weight: 600; }
+  .savebar .okmsg { color: var(--good); font-weight: 600; }
+  .ed-list { display: grid; gap: 12px; }
+  .ed { display: grid; gap: 10px; }
+  .ed-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .ed-head .n { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; flex: none; }
+  .ed-head .t { flex: 1; min-width: 160px; font-weight: 600; }
+  .ed-head .tools { display: flex; gap: 4px; }
+  .ed-head .tools button { padding: 4px 9px; font-size: 13px; }
+  .ed-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+  .fld { display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-2); align-content: start; }
+  .fld input, .fld select, .fld textarea, .ed textarea { font: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); width: 100%; }
+  .fld textarea { min-height: 76px; resize: vertical; }
+  .fld .hint { color: var(--muted); font-size: 11.5px; }
+  .file-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; background: var(--surface-2); border-radius: 8px; font-size: 13px; }
+  .file-row .grow { flex: 1; min-width: 180px; }
+  .file-row video { width: 100%; max-width: 360px; border-radius: 8px; background: #000; margin-top: 6px; }
+  .opt-row { display: grid; grid-template-columns: 34px 1fr; gap: 8px; align-items: center; }
+  .opt-row label { display: flex; align-items: center; gap: 4px; font-weight: 700; color: var(--ink); cursor: pointer; }
+  details.q-ed > summary { cursor: pointer; list-style: none; display: flex; gap: 10px; align-items: baseline; }
+  details.q-ed > summary::-webkit-details-marker { display: none; }
+  details.q-ed > summary .qid { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; flex: none; }
+  details.q-ed > summary .qt { flex: 1; }
+  details.q-ed[open] > summary { margin-bottom: 12px; }
+  .btn-danger { color: var(--bad); }
+  .test-box { display: flex; gap: 8px; flex-wrap: wrap; }
+  .test-box input { flex: 1; min-width: 220px; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
+  .test-out { white-space: pre-wrap; margin-top: 10px; padding: 10px 12px; background: var(--surface-2); border-radius: 8px; font-size: 13.5px; color: var(--ink-2); }
+  @media (max-width: 640px) { .savebar { top: 0; position: static; } .top { height: auto; flex-wrap: wrap; padding: 10px 0; gap: 10px; } .top .status { display: none; } .top h1 { font-size: 16px; } .top small { display: none; } }
   @media (max-width: 640px) { .bar-row { grid-template-columns: 100px 1fr 44px; } .kpi .value { font-size: 24px; } }
 </style>
 </head>
@@ -135,6 +171,7 @@
         <button data-view="tutor">Tutor IA</button>
         <button data-view="videos">Videos</button>
         <button data-view="usuarios">Usuarios</button>
+        <button data-view="contenido">Contenido del bot</button>
       </nav>
     </div>
   </header>
@@ -189,6 +226,22 @@
     <section class="view" id="view-usuarios">
       <div class="toolbar"><input id="user-search" placeholder="Buscar por nombre…"></div>
       <div class="card"><div class="table-wrap"><table id="tbl-users"></table></div></div>
+    </section>
+
+    <section class="view" id="view-contenido">
+      <div class="subtabs" id="ct-tabs">
+        <button data-ct="videos" class="active">🎬 Videos</button>
+        <button data-ct="quiz">📝 Banco de preguntas</button>
+        <button data-ct="fallback">🛟 Respuestas sin IA</button>
+      </div>
+      <div class="card savebar">
+        <div class="grow" id="ct-msg">Los cambios llegan al bot en menos de 30 segundos, sin reiniciarlo.</div>
+        <button id="ct-add">＋ Agregar</button>
+        <button id="ct-reset" hidden>Restaurar de fábrica</button>
+        <button class="btn-primary" id="ct-save">Guardar cambios</button>
+      </div>
+      <div id="ct-intro" class="muted" style="margin:-4px 0 12px;font-size:13px"></div>
+      <div id="ct-body" class="ed-list"></div>
     </section>
   </main>
 </div>
@@ -376,6 +429,272 @@ async function loadAll() {
   }
 }
 
+// ---- Contenido administrable ----
+const CT = { section: 'videos', data: null, dirty: { videos: false, quiz: false, fallback: false }, open: new Set() };
+const INTROS = {
+  videos: 'Edita los videotutoriales que ve el estudiante en la opción 2: título, tema, ideas clave y el archivo MP4 (o un enlace de YouTube si pesa más de 16 MB). El orden de la lista es el orden del menú.',
+  quiz: 'Preguntas de la prueba diagnóstica (5 al azar, de temas distintos) y de los mini retos de cada video. Usa *texto* para negrita en WhatsApp.',
+  fallback: 'Cuando la IA no responde (sin cupo o sin internet), el tutor busca estas palabras clave en la pregunta y envía la respuesta asociada. Si ninguna coincide, usa la respuesta general.',
+};
+const fmtMB = (b) => (b / 1048576).toFixed(1) + ' MB';
+const lines = (a) => (a || []).join('\n');
+const csv = (a) => (a || []).join(', ');
+const splitCsv = (t) => String(t || '').split(',').map((x) => x.trim()).filter(Boolean);
+const splitLines = (t) => String(t || '').split('\n').map((x) => x.trim()).filter(Boolean);
+
+async function loadContent() {
+  CT.data = await api('/api/admin/content');
+  CT.dirty = { videos: false, quiz: false, fallback: false };
+  if (CT.data.videos.length) Object.assign(VIDEO_NAMES, Object.fromEntries(CT.data.videos.map((v) => [v.id, v.title])));
+  Object.assign(TOPIC_NAMES, Object.fromEntries(Object.entries(CT.data.topics || {}).map(([k, t]) => [k, t.name])));
+  renderContent();
+}
+
+function ctMsg(html, cls = '') { $('#ct-msg').innerHTML = `<span class="${cls}">${html}</span>`; }
+function markDirty() { CT.dirty[CT.section] = true; ctMsg('Hay cambios sin guardar', 'dirty'); }
+
+function topicOptions(sel, allowNone) {
+  const t = CT.data.topics || {};
+  return (allowNone ? `<option value="">Sin tema (no se recomienda en la prueba)</option>` : '<option value="">Elige un tema…</option>') +
+    Object.entries(t).map(([k, v]) => `<option value="${esc(k)}" ${k === sel ? 'selected' : ''}>${esc(v.name)}</option>`).join('');
+}
+
+function renderContent() {
+  if (!CT.data) return;
+  document.querySelectorAll('#ct-tabs button').forEach((b) => b.classList.toggle('active', b.dataset.ct === CT.section));
+  $('#ct-intro').textContent = INTROS[CT.section];
+  $('#ct-reset').hidden = CT.section !== 'fallback';
+  $('#ct-add').textContent = { videos: '＋ Agregar video', quiz: '＋ Agregar pregunta', fallback: '＋ Agregar respuesta' }[CT.section];
+  if (!CT.dirty[CT.section]) ctMsg('Los cambios llegan al bot en menos de 30 segundos, sin reiniciarlo.');
+  if (!CT.data.seeded && CT.section !== 'fallback') {
+    $('#ct-body').innerHTML = '<div class="card empty-state">Enciende el bot de WhatsApp una vez para cargar aquí los videos y preguntas de fábrica.</div>';
+    return;
+  }
+  ({ videos: renderVideoEditor, quiz: renderQuizEditor, fallback: renderFallbackEditor })[CT.section]();
+}
+
+function renderVideoEditor() {
+  const views = Object.fromEntries((DATA.videos || []).map((v) => [v.video, v.views]));
+  const vids = CT.data.videos;
+  $('#ct-body').innerHTML = vids.map((v, i) => {
+    const saved = !!v._saved || !v._new;
+    const file = v.file_exists
+      ? `<b>MP4 cargado</b> · ${esc(v.file.split('/').pop())} · ${fmtMB(v.file_size)}`
+      : (v.url ? '<span class="muted">Sin MP4: se enviará el enlace</span>' : '<span class="muted">Sin MP4 ni enlace: el bot muestra las ideas clave y avisa «video en producción»</span>');
+    return `
+    <div class="card ed" data-i="${i}">
+      <div class="ed-head">
+        <span class="n">${i + 1}</span>
+        <span class="t">${esc(v.title || 'Video nuevo')}</span>
+        <span class="muted">${views[v.id] ? views[v.id] + ' reproducciones' : ''}</span>
+        <span class="tools">
+          <button data-act="up" title="Subir" ${i === 0 ? 'disabled' : ''}>↑</button>
+          <button data-act="down" title="Bajar" ${i === vids.length - 1 ? 'disabled' : ''}>↓</button>
+          <button data-act="del" class="btn-danger" title="Eliminar">✕</button>
+        </span>
+      </div>
+      <div class="ed-grid">
+        <label class="fld">Título<input data-f="title" value="${esc(v.title)}" maxlength="80"></label>
+        <label class="fld">Tema<select data-f="topic">${topicOptions(v.topic, true)}</select><span class="hint">Se recomienda al fallar preguntas de este tema y define su mini reto.</span></label>
+        <label class="fld">Enlace de respaldo (opcional)<input data-f="url" value="${esc(v.url)}" placeholder="https://youtu.be/…"><span class="hint">Se envía si no hay MP4 o si falla el envío.</span></label>
+      </div>
+      <div class="ed-grid">
+        <label class="fld">Ideas clave (una por línea)<textarea data-f="points">${esc(lines(v.points))}</textarea></label>
+        <label class="fld">Palabras para pedirlo (separadas por coma)<textarea data-f="keywords" style="min-height:76px">${esc(csv(v.keywords))}</textarea><span class="hint">Ej.: memoria ram, ram. El estudiante puede escribirlas o decirlas por voz.</span></label>
+      </div>
+      <div class="file-row">
+        <span class="grow">${file}</span>
+        ${saved ? `
+          ${v.file_exists ? `<button data-act="play">▶ Ver</button>` : ''}
+          <label class="btn" style="margin:0">${v.file_exists ? 'Reemplazar MP4' : 'Subir MP4'}<input type="file" accept="video/mp4" data-act="upload" hidden></label>
+          ${v.file_exists ? `<button data-act="rmfile" class="btn-danger">Quitar MP4</button>` : ''}`
+        : '<span class="muted">Guarda los cambios para poder subir el MP4.</span>'}
+        <div class="player" style="width:100%"></div>
+      </div>
+    </div>`;
+  }).join('') || '<div class="card empty-state">No hay videos</div>';
+}
+
+function renderQuizEditor() {
+  const qs = CT.data.quiz;
+  const f = (CT.filter || '').toLowerCase();
+  const ft = CT.filterTopic || '';
+  const stats = Object.fromEntries(((DATA.quiz && DATA.quiz.by_question) || []).map((q) => [q.question_id, q]));
+  const toolbar = `<div class="toolbar" style="margin:0">
+      <input id="q-search" placeholder="Buscar pregunta…" value="${esc(CT.filter || '')}">
+      <select id="q-topic"><option value="">Todos los temas</option>${Object.entries(CT.data.topics || {}).map(([k, v]) => `<option value="${esc(k)}" ${k === ft ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select>
+      <span class="muted">${qs.length} preguntas</span></div>`;
+  const items = qs.map((q, i) => ({ q, i })).filter(({ q }) =>
+    (!ft || q.topic === ft) && (!f || (q.question + ' ' + Object.values(q.options || {}).join(' ')).toLowerCase().includes(f)));
+  $('#ct-body').innerHTML = toolbar + (items.map(({ q, i }) => {
+    const st = stats[q.id];
+    return `
+    <details class="card ed q-ed" data-i="${i}" ${CT.open.has(i) ? 'open' : ''}>
+      <summary><span class="qid">${esc(q.id || 'nueva')}</span><span class="qt">${esc((q.question || 'Pregunta nueva').replace(/\*/g, ''))}</span>
+        <span class="pill">${esc((CT.data.topics[q.topic] || {}).name || 'Sin tema')}</span>
+        ${st ? `<span class="pill ${st.pct < 60 ? 'low' : 'ok'}">${st.pct} % acierto</span>` : ''}</summary>
+      <label class="fld">Enunciado<textarea data-f="question" style="min-height:56px">${esc(q.question)}</textarea></label>
+      <div class="fld">Opciones <span class="hint">Marca la correcta</span>
+        ${['a', 'b', 'c'].map((k) => `<div class="opt-row"><label><input type="radio" name="c${i}" data-f="correct" value="${k}" ${q.correct === k ? 'checked' : ''}>${k.toUpperCase()}</label><input data-o="${k}" value="${esc((q.options || {})[k])}"></div>`).join('')}
+      </div>
+      <div class="ed-grid">
+        <label class="fld">Tema<select data-f="topic">${topicOptions(q.topic, false)}</select></label>
+        <label class="fld">Explicación (se muestra después de responder)<textarea data-f="explain">${esc(q.explain)}</textarea></label>
+      </div>
+      <div><button data-act="del" class="btn-danger">Eliminar pregunta</button></div>
+    </details>`;
+  }).join('') || '<div class="card empty-state">No hay preguntas con estos filtros</div>');
+}
+
+function renderFallbackEditor() {
+  const fb = CT.data.fallback;
+  $('#ct-body').innerHTML = `
+    <div class="card ed">
+      <h2 style="margin:0">Probar <span>· escribe una pregunta como la haría un estudiante</span></h2>
+      <div class="test-box"><input id="fb-test" placeholder="Ej.: ¿para qué sirve la memoria RAM?"><button id="fb-test-btn">Probar</button></div>
+      <div id="fb-test-out"></div>
+      <div class="muted" style="font-size:12px">${CT.data.fallback_custom ? 'Estás usando respuestas personalizadas.' : 'Estás usando las respuestas de fábrica.'} La prueba usa lo guardado.</div>
+    </div>
+    <div class="card ed">
+      <h2 style="margin:0">Respuesta general <span>· cuando ninguna palabra clave coincide</span></h2>
+      <textarea data-fb="default" style="min-height:110px">${esc(fb.default)}</textarea>
+    </div>` + fb.topics.map((t, i) => `
+    <div class="card ed" data-i="${i}">
+      <div class="ed-head"><span class="n">${i + 1}</span><span class="t">${esc(csv(t.keywords) || 'Respuesta nueva')}</span>
+        <span class="tools"><button data-act="del" class="btn-danger" title="Eliminar">✕</button></span></div>
+      <label class="fld">Palabras clave (separadas por coma)<input data-f="keywords" value="${esc(csv(t.keywords))}"><span class="hint">Se buscan como palabras completas, sin importar tildes ni mayúsculas. Gana la más específica.</span></label>
+      <label class="fld">Respuesta<textarea data-f="response" style="min-height:96px">${esc(t.response)}</textarea></label>
+    </div>`).join('');
+}
+
+// Lectura de los formularios hacia CT.data
+function readEditors() {
+  const sec = CT.section;
+  if (sec === 'fallback') {
+    const d = document.querySelector('[data-fb="default"]');
+    if (d) CT.data.fallback.default = d.value;
+  }
+  document.querySelectorAll('#ct-body [data-i]').forEach((card) => {
+    const i = +card.dataset.i;
+    const item = sec === 'videos' ? CT.data.videos[i] : sec === 'quiz' ? CT.data.quiz[i] : CT.data.fallback.topics[i];
+    if (!item) return;
+    card.querySelectorAll('[data-f]').forEach((el) => {
+      const f = el.dataset.f;
+      if (el.type === 'radio') { if (el.checked) item[f] = el.value; return; }
+      if (f === 'points') item.points = splitLines(el.value);
+      else if (f === 'keywords') item.keywords = splitCsv(el.value);
+      else item[f] = el.value;
+    });
+    card.querySelectorAll('[data-o]').forEach((el) => { item.options = item.options || {}; item.options[el.dataset.o] = el.value; });
+  });
+}
+
+function payload() {
+  if (CT.section === 'videos') return CT.data.videos.map(({ file_exists, file_size, _new, _saved, ...v }) => v);
+  if (CT.section === 'quiz') return CT.data.quiz;
+  return CT.data.fallback;
+}
+
+async function saveContent() {
+  readEditors();
+  const btn = $('#ct-save');
+  btn.disabled = true; ctMsg('Guardando…');
+  try {
+    const res = await fetch(`/api/admin/content/${CT.section}`, { method: 'PUT', headers: { 'X-Panel-Key': KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(payload()) });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) { ctMsg(esc(out.detail || 'No se pudo guardar'), 'err'); return; }
+    const sec = CT.section;
+    await loadContent();
+    CT.section = sec; renderContent();
+    ctMsg('✓ Guardado. El bot lo aplicará en menos de 30 segundos.', 'okmsg');
+  } catch (e) {
+    ctMsg('No se pudo conectar con el servicio', 'err');
+  } finally { btn.disabled = false; }
+}
+
+$('#ct-tabs').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-ct]');
+  if (!b) return;
+  readEditors();
+  CT.section = b.dataset.ct; CT.open.clear(); renderContent();
+});
+$('#ct-save').addEventListener('click', saveContent);
+$('#ct-add').addEventListener('click', () => {
+  readEditors();
+  if (CT.section === 'videos') CT.data.videos.push({ title: '', topic: null, points: [], keywords: [], url: '', file: '', _new: true });
+  else if (CT.section === 'quiz') { CT.data.quiz.push({ id: '', topic: '', question: '', options: { a: '', b: '', c: '' }, correct: '', explain: '' }); CT.filter = ''; CT.filterTopic = ''; CT.open.add(CT.data.quiz.length - 1); }
+  else CT.data.fallback.topics.push({ keywords: [], response: '' });
+  markDirty(); renderContent(); markDirty();
+  const cards = document.querySelectorAll('#ct-body [data-i]');
+  cards[cards.length - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+$('#ct-reset').addEventListener('click', async () => {
+  if (!confirm('¿Volver a las respuestas sin IA de fábrica? Se perderán las personalizadas.')) return;
+  await api('/api/admin/content/fallback', { method: 'DELETE' });
+  await loadContent(); CT.section = 'fallback'; renderContent();
+  ctMsg('✓ Respuestas de fábrica restauradas.', 'okmsg');
+});
+$('#ct-body').addEventListener('input', (e) => {
+  if (e.target.id === 'q-search' || e.target.id === 'q-topic' || e.target.id === 'fb-test') return;
+  markDirty();
+});
+$('#ct-body').addEventListener('change', async (e) => {
+  if (e.target.id === 'q-topic' || e.target.id === 'q-search') {
+    readEditors(); CT.filter = $('#q-search').value; CT.filterTopic = $('#q-topic').value; renderContent(); return;
+  }
+  if (e.target.dataset.act !== 'upload') return;
+  const file = e.target.files[0];
+  if (!file) return;
+  const i = +e.target.closest('[data-i]').dataset.i;
+  const v = CT.data.videos[i];
+  if (file.size > CT.data.max_video_mb * 1048576) { ctMsg(`El archivo pesa ${fmtMB(file.size)}; el máximo es ${CT.data.max_video_mb} MB. Comprímelo o usa un enlace.`, 'err'); return; }
+  ctMsg(`Subiendo «${esc(file.name)}» (${fmtMB(file.size)})…`);
+  try {
+    const res = await fetch(`/api/admin/videos/${encodeURIComponent(v.id)}/file`, { method: 'PUT', headers: { 'X-Panel-Key': KEY, 'Content-Type': 'application/octet-stream' }, body: file });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) { ctMsg(esc(out.detail || 'No se pudo subir el video'), 'err'); return; }
+    readEditors(); Object.assign(v, out); renderContent();
+    ctMsg(`✓ Video «${esc(v.title)}» cargado. Ya se envía en el chat.`, 'okmsg');
+  } catch (_) { ctMsg('No se pudo subir el video', 'err'); }
+});
+$('#ct-body').addEventListener('click', async (e) => {
+  if (e.target.id === 'fb-test-btn') {
+    const msg = $('#fb-test').value.trim();
+    if (!msg) return;
+    const out = await api('/api/admin/fallback/test', { method: 'POST', body: JSON.stringify({ message: msg }) });
+    $('#fb-test-out').innerHTML = `<div class="test-out">${esc(out.reply)}</div>`;
+    return;
+  }
+  const b = e.target.closest('button[data-act]');
+  if (!b) return;
+  const card = b.closest('[data-i]');
+  const i = +card.dataset.i;
+  const list = CT.section === 'videos' ? CT.data.videos : CT.section === 'quiz' ? CT.data.quiz : CT.data.fallback.topics;
+  const act = b.dataset.act;
+  if (act === 'play') {
+    const v = CT.data.videos[i];
+    card.querySelector('.player').innerHTML = `<video controls autoplay src="/api/admin/videos/${encodeURIComponent(v.id)}/file?key=${encodeURIComponent(KEY)}"></video>`;
+    return;
+  }
+  if (act === 'rmfile') {
+    if (!confirm('¿Quitar el MP4 de este video? El bot enviará el enlace o las ideas clave.')) return;
+    const out = await api(`/api/admin/videos/${encodeURIComponent(CT.data.videos[i].id)}/file`, { method: 'DELETE' });
+    readEditors(); Object.assign(CT.data.videos[i], out); renderContent(); return;
+  }
+  readEditors();
+  if (act === 'del') {
+    if (!confirm('¿Eliminar este elemento? Se aplicará al guardar los cambios.')) return;
+    list.splice(i, 1);
+  } else if (act === 'up' && i > 0) [list[i - 1], list[i]] = [list[i], list[i - 1]];
+  else if (act === 'down' && i < list.length - 1) [list[i + 1], list[i]] = [list[i], list[i + 1]];
+  markDirty(); renderContent(); markDirty();
+});
+$('#ct-body').addEventListener('toggle', (e) => {
+  const d = e.target.closest && e.target.closest('details.q-ed');
+  if (d) { const i = +d.dataset.i; d.open ? CT.open.add(i) : CT.open.delete(i); }
+}, true);
+window.addEventListener('beforeunload', (e) => { if (Object.values(CT.dirty).some(Boolean)) { e.preventDefault(); e.returnValue = ''; } });
+
 // ---- Eventos ----
 $('#tabs').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-view]');
@@ -412,6 +731,7 @@ async function enter() {
     $('#login').style.display = 'none'; $('#app').hidden = false;
     renderExports();
     loadIaStatus();
+    loadContent().catch(() => {});
     const tab = sessionStorage.getItem('cf_tab');
     if (tab) document.querySelector(`#tabs button[data-view="${tab}"]`)?.click();
     loadAll();

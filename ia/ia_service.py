@@ -167,12 +167,43 @@ FALLBACK_DEFAULT = (
 )
 
 
+def fallback_defaults() -> dict:
+    """Respuestas de contingencia de fábrica (el panel puede reemplazarlas)."""
+    return {"default": FALLBACK_DEFAULT, "topics": FALLBACK_TOPICS}
+
+
+def fallback_content() -> dict:
+    """Respuestas de contingencia vigentes: las del panel o, si no hay, las de fábrica."""
+    try:
+        import db
+
+        data = db.get_content("fallback")
+        if data and isinstance(data.get("topics"), list):
+            return data
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(f"No se pudieron leer las respuestas del panel: {exc}")
+    return fallback_defaults()
+
+
+def _plain(text: str) -> str:
+    import unicodedata
+
+    t = unicodedata.normalize("NFD", text.lower())
+    return "".join(c for c in t if unicodedata.category(c) != "Mn")
+
+
 def fallback_response(user_message: str) -> str:
-    text = user_message.lower()
-    for topic in FALLBACK_TOPICS:
-        if any(keyword in text for keyword in topic["keywords"]):
-            return topic["response"]
-    return FALLBACK_DEFAULT
+    data = fallback_content()
+    text = _plain(user_message)
+    best, best_len = None, 0
+    for topic in data.get("topics", []):
+        for keyword in topic.get("keywords", []):
+            k = _plain(keyword).strip()
+            if k and re.search(r"(?<![a-z0-9])" + re.escape(k) + r"(?![a-z0-9])", text) and len(k) > best_len:
+                best, best_len = topic, len(k)
+    if best and best.get("response"):
+        return best["response"]
+    return data.get("default") or FALLBACK_DEFAULT
 
 
 def to_whatsapp(text: str) -> str:

@@ -14,13 +14,14 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
 
 import base64
 
+import content_admin
 import db
 import voice
 from ia_service import get_ai_response, ia_status
@@ -268,6 +269,69 @@ def admin_videos(_: bool = Depends(require_admin)):
 @app.get("/api/admin/users")
 def admin_users(_: bool = Depends(require_admin)):
     return db.admin_users()
+
+
+# ---- Contenido administrable ------------------------------------------------
+
+def _content_call(fn, *args):
+    try:
+        return fn(*args)
+    except content_admin.ContentError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.get("/api/content")
+def content_for_bot():
+    """Lo consulta el bot cada pocos segundos para aplicar los cambios del panel."""
+    return content_admin.bot_content()
+
+
+@app.post("/api/content/seed")
+def content_seed(payload: dict = Body(...)):
+    return content_admin.seed(payload)
+
+
+@app.get("/api/admin/content")
+def admin_content(_: bool = Depends(require_admin)):
+    return content_admin.admin_content()
+
+
+@app.put("/api/admin/content/{section}")
+def admin_content_save(section: str, data=Body(...), _: bool = Depends(require_admin)):
+    clean = _content_call(content_admin.save, section, data)
+    return {"ok": True, "data": clean, "version": db.content_version()}
+
+
+@app.delete("/api/admin/content/{section}")
+def admin_content_reset(section: str, _: bool = Depends(require_admin)):
+    _content_call(content_admin.reset, section)
+    return {"ok": True}
+
+
+@app.post("/api/admin/fallback/test")
+def admin_fallback_test(payload: dict = Body(...), _: bool = Depends(require_admin)):
+    from ia_service import fallback_response
+
+    return {"reply": fallback_response(str(payload.get("message") or ""))}
+
+
+@app.put("/api/admin/videos/{vid}/file")
+async def admin_video_upload(vid: str, request: Request, _: bool = Depends(require_admin)):
+    data = await request.body()
+    return _content_call(content_admin.save_video_file, vid, data)
+
+
+@app.delete("/api/admin/videos/{vid}/file")
+def admin_video_delete(vid: str, _: bool = Depends(require_admin)):
+    return _content_call(content_admin.delete_video_file, vid)
+
+
+@app.get("/api/admin/videos/{vid}/file")
+def admin_video_file(vid: str, _: bool = Depends(require_admin)):
+    path = _content_call(content_admin.video_path, vid)
+    if not path:
+        raise HTTPException(status_code=404, detail="Este video aún no tiene archivo")
+    return FileResponse(path, media_type="video/mp4")
 
 
 @app.get("/api/admin/export/{name}.csv")

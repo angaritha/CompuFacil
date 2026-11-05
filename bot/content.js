@@ -260,4 +260,54 @@ const QUIZ = [
   },
 ];
 
-module.exports = { TOPICS, TUTORIALS, QUIZ };
+// Palabras con las que el estudiante puede pedir cada video ("memoria ram", "ensamble"…)
+const TUTORIAL_KEYWORDS = {
+  cpu: ['procesador', 'cpu', 'microprocesador'],
+  ram: ['memoria ram', 'ram', 'memoria'],
+  almacenamiento: ['almacenamiento', 'disco duro', 'ssd', 'hdd', 'disco'],
+  placa: ['placa madre', 'tarjeta madre', 'motherboard', 'placa base'],
+  gpu: ['tarjeta grafica', 'grafica', 'gpu', 'tarjeta de video'],
+  psu: ['fuente de poder', 'fuente', 'fuente de alimentacion'],
+  perifericos: ['perifericos', 'puertos', 'usb'],
+  ensamble: ['ensamble', 'armar un pc', 'armar computador', 'ensamblar'],
+};
+for (const t of TUTORIALS) {
+  t.topic = TOPICS[t.id] ? t.id : null;
+  t.keywords = TUTORIAL_KEYWORDS[t.id] || [];
+}
+
+// Valores de fábrica (se envían al panel la primera vez).
+const DEFAULTS = JSON.parse(JSON.stringify({ topics: TOPICS, videos: TUTORIALS, quiz: QUIZ }));
+
+// Preguntas que alguna vez existieron: si el docente borra una pregunta en
+// medio de una prueba, el estudiante puede terminarla igual.
+const QUESTION_ARCHIVE = new Map(QUIZ.map((q) => [q.id, q]));
+
+function replaceArray(target, items) {
+  target.splice(0, target.length, ...items);
+}
+
+/** Aplica el contenido que llega del panel sin cambiar las referencias. */
+function applyRemote(data) {
+  if (!data) return false;
+  let changed = false;
+  if (Array.isArray(data.videos) && data.videos.length) {
+    replaceArray(TUTORIALS, data.videos.map((v) => ({ ...v, points: v.points || [], keywords: v.keywords || [] })));
+    changed = true;
+  }
+  if (Array.isArray(data.quiz) && data.quiz.length >= 5) {
+    replaceArray(QUIZ, data.quiz);
+    data.quiz.forEach((q) => QUESTION_ARCHIVE.set(q.id, q));
+    changed = true;
+  }
+  if (changed) {
+    // Video recomendado por tema: el primero que tenga ese tema.
+    for (const key of Object.keys(TOPICS)) {
+      const tut = TUTORIALS.find((t) => t.topic === key);
+      TOPICS[key].tutorial = tut ? tut.id : null;
+    }
+  }
+  return changed;
+}
+
+module.exports = { TOPICS, TUTORIALS, QUIZ, DEFAULTS, QUESTION_ARCHIVE, applyRemote };
