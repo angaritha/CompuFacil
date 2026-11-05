@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel CompuFácil</title>
+<style>
+  :root {
+    --bg: #f6f4f1; --surface: #ffffff; --surface-2: #faf8f6; --ink: #1f1d1b; --ink-2: #57524c; --muted: #8a847d;
+    --line: #e6e1db; --accent: #b3262e; --accent-soft: #f6e3e2; --bar: #b3262e; --bar-track: #efe9e3;
+    --good: #2f7d4f; --good-soft: #e3f1e8; --warn: #a26a00; --warn-soft: #f8edd6; --bad: #b3262e;
+    --shadow: 0 1px 2px rgba(31,29,27,.06), 0 4px 16px rgba(31,29,27,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161514; --surface: #201f1d; --surface-2: #272523; --ink: #f2efeb; --ink-2: #c5bfb8; --muted: #8f8982;
+      --line: #34312e; --accent: #e0656c; --accent-soft: #3a2324; --bar: #e0656c; --bar-track: #2f2c29;
+      --good: #6cc192; --good-soft: #1e3328; --warn: #e2b04f; --warn-soft: #3a3020; --bad: #e0656c;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; }
+  header { background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+  .top { display: flex; align-items: center; gap: 14px; height: 64px; }
+  .logo { width: 36px; height: 36px; border-radius: 10px; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; }
+  .top h1 { font-size: 18px; margin: 0; }
+  .top small { color: var(--muted); display: block; font-size: 12px; margin-top: -2px; }
+  .top .spacer { flex: 1; }
+  .status { font-size: 12px; color: var(--muted); }
+  button, .btn { font: inherit; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 7px 12px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+  button:hover, .btn:hover { border-color: var(--ink-2); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  nav.tabs { display: flex; gap: 4px; overflow-x: auto; }
+  nav.tabs button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 10px 14px; color: var(--ink-2); background: none; white-space: nowrap; }
+  nav.tabs button.active { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+  main.wrap { padding-top: 24px; padding-bottom: 60px; }
+  .ia-status { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 16px; }
+  .ia-status .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--muted); }
+  .ia-status.ok .dot { background: var(--good); } .ia-status.bajo .dot { background: var(--warn); } .ia-status.bad .dot { background: var(--bad); }
+  .ia-status .txt { flex: 1; } .ia-status .txt b { font-weight: 600; } .ia-status .txt small { display: block; color: var(--muted); font-size: 12px; }
+  .ia-meter { width: 160px; height: 6px; border-radius: 3px; background: var(--bar-track); overflow: hidden; flex: none; }
+  .ia-meter i { display: block; height: 100%; background: var(--good); }
+  .ia-status.bajo .ia-meter i { background: var(--warn); }
+  @media (max-width: 640px) { .ia-meter { display: none; } }
+  section.view { display: none; }
+  section.view.active { display: block; }
+  .grid { display: grid; gap: 16px; }
+  .kpis { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-bottom: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; box-shadow: var(--shadow); }
+  .kpi .label { color: var(--ink-2); font-size: 13px; }
+  .kpi .value { font-size: 30px; font-weight: 700; letter-spacing: -.5px; margin-top: 4px; }
+  .kpi .sub { color: var(--muted); font-size: 12px; }
+  .two { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .card h2 { font-size: 15px; margin: 0 0 14px; }
+  .card h2 span { color: var(--muted); font-weight: 400; font-size: 13px; }
+  .bars { display: grid; gap: 10px; }
+  .bar-row { display: grid; grid-template-columns: 150px 1fr 56px; gap: 10px; align-items: center; font-size: 13px; }
+  .bar-row .name { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .track { height: 12px; background: var(--bar-track); border-radius: 4px; overflow: hidden; }
+  .fill { height: 100%; background: var(--bar); border-radius: 0 4px 4px 0; min-width: 2px; }
+  .bar-row .num { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .cols { display: flex; align-items: flex-end; gap: 4px; height: 150px; padding-top: 10px; border-bottom: 1px solid var(--line); }
+  .col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; position: relative; }
+  .col .stick { width: 100%; max-width: 26px; background: var(--bar); border-radius: 4px 4px 0 0; min-height: 2px; }
+  .col:hover .stick { opacity: .75; }
+  .col-labels { display: flex; gap: 4px; font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .col-labels span { flex: 1; text-align: center; overflow: hidden; }
+  .tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; padding: 6px 9px; border-radius: 6px; opacity: 0; transition: opacity .1s; z-index: 50; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+  .toolbar input, .toolbar select { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
+  .toolbar input { min-width: 220px; flex: 1; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .3px; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  .table-wrap { overflow-x: auto; }
+  .pill { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-2); white-space: nowrap; }
+  .pill.nuevo { background: var(--accent-soft); border-color: transparent; color: var(--accent); font-weight: 600; }
+  .pill.resuelto { background: var(--good-soft); border-color: transparent; color: var(--good); }
+  .pill.ok { background: var(--good-soft); color: var(--good); border-color: transparent; }
+  .pill.low { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+  .stars { color: #d39b16; letter-spacing: 1px; white-space: nowrap; }
+  .fb-list { display: grid; gap: 12px; }
+  .fb { display: grid; gap: 6px; }
+  .fb .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-2); }
+  .fb .comment { font-size: 15px; white-space: pre-wrap; }
+  .fb .comment.empty { color: var(--muted); font-style: italic; }
+  .fb .actions { display: flex; gap: 6px; }
+  .fb .actions button { padding: 4px 10px; font-size: 12px; }
+  details.qa summary { cursor: pointer; list-style: none; }
+  details.qa summary::-webkit-details-marker { display: none; }
+  details.qa .answer { margin-top: 8px; padding: 10px 12px; background: var(--surface-2); border-radius: 8px; white-space: pre-wrap; color: var(--ink-2); font-size: 13.5px; }
+  .muted { color: var(--muted); }
+  .empty-state { text-align: center; color: var(--muted); padding: 30px 10px; }
+  .exports { display: flex; flex-wrap: wrap; gap: 8px; }
+  #login { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
+  #login .card { width: 100%; max-width: 380px; text-align: center; }
+  #login input { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; margin: 14px 0 10px; background: var(--surface); color: var(--ink); }
+  #login .err { color: var(--bad); font-size: 13px; min-height: 18px; }
+  @media (max-width: 640px) { .bar-row { grid-template-columns: 100px 1fr 44px; } .kpi .value { font-size: 24px; } }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="card">
+    <div class="logo" style="margin:0 auto 10px">CF</div>
+    <h2 style="margin:0">Panel CompuFácil</h2>
+    <p class="muted" style="margin:6px 0 0">Ingresa la clave del panel.</p>
+    <form id="login-form">
+      <input id="pwd" type="password" placeholder="Clave" autocomplete="current-password" autofocus>
+      <div class="err" id="login-err"></div>
+      <button class="btn-primary" style="width:100%;justify-content:center">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <header>
+    <div class="wrap">
+      <div class="top">
+        <div class="logo">CF</div>
+        <div><h1>CompuFácil</h1><small>Panel de seguimiento del chatbot</small></div>
+        <div class="spacer"></div>
+        <span class="status" id="updated"></span>
+        <button id="refresh" title="Actualizar">↻ Actualizar</button>
+        <button id="logout" title="Salir">Salir</button>
+      </div>
+      <nav class="tabs" id="tabs">
+        <button data-view="resumen" class="active">Resumen</button>
+        <button data-view="comentarios">Comentarios <span id="badge-new"></span></button>
+        <button data-view="prueba">Prueba diagnóstica</button>
+        <button data-view="tutor">Tutor IA</button>
+        <button data-view="videos">Videos</button>
+        <button data-view="usuarios">Usuarios</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="view active" id="view-resumen">
+      <div class="card ia-status" id="ia-status"><span class="dot"></span><div class="txt"><b>Revisando la IA…</b></div></div>
+      <div class="grid kpis" id="kpis"></div>
+      <div class="grid two">
+        <div class="card"><h2>Actividad diaria <span>· eventos por día (últimos 30)</span></h2><div id="chart-daily"></div></div>
+        <div class="card"><h2>Opciones más usadas <span>· veces elegidas en el menú</span></h2><div id="chart-menu" class="bars"></div></div>
+        <div class="card"><h2>Calificación de los estudiantes <span>· respuestas por estrellas</span></h2><div id="chart-rating" class="bars"></div></div>
+        <div class="card"><h2>Exportar a Excel <span>· archivos CSV</span></h2>
+          <p class="muted" style="margin-top:0">Descarga los datos para el informe del proyecto. Se abren directamente en Excel.</p>
+          <div class="exports" id="exports"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-comentarios">
+      <div class="toolbar">
+        <input id="fb-search" placeholder="Buscar en comentarios o nombres…">
+        <select id="fb-status"><option value="">Todos los estados</option><option value="nuevo">Nuevos</option><option value="leido">Leídos</option><option value="resuelto">Resueltos</option></select>
+        <select id="fb-cat"><option value="">Todas las categorías</option></select>
+      </div>
+      <div class="fb-list" id="fb-list"></div>
+    </section>
+
+    <section class="view" id="view-prueba">
+      <div class="grid two">
+        <div class="card"><h2>Aciertos por tema <span>· % de respuestas correctas</span></h2><div id="chart-topics" class="bars"></div></div>
+        <div class="card"><h2>Preguntas más difíciles <span>· menor % de acierto</span></h2><div class="table-wrap"><table id="tbl-questions"></table></div></div>
+      </div>
+      <div class="card" style="margin-top:16px"><h2>Intentos</h2><div class="table-wrap"><table id="tbl-attempts"></table></div></div>
+    </section>
+
+    <section class="view" id="view-tutor">
+      <div class="toolbar">
+        <input id="tutor-search" placeholder="Buscar en las preguntas…">
+        <select id="tutor-filter"><option value="">Todas</option><option value="1">Con 👍</option><option value="-1">Con 👎</option><option value="contingencia">Respondidas sin IA (contingencia)</option></select>
+      </div>
+      <div class="card"><div class="table-wrap"><table id="tbl-tutor"></table></div></div>
+    </section>
+
+    <section class="view" id="view-videos">
+      <div class="grid two">
+        <div class="card"><h2>Reproducciones por video</h2><div id="chart-videos" class="bars"></div></div>
+        <div class="card"><h2>Detalle</h2><div class="table-wrap"><table id="tbl-videos"></table></div></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-usuarios">
+      <div class="toolbar"><input id="user-search" placeholder="Buscar por nombre…"></div>
+      <div class="card"><div class="table-wrap"><table id="tbl-users"></table></div></div>
+    </section>
+  </main>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+const VIDEO_NAMES = { cpu: 'El procesador (CPU)', ram: 'La memoria RAM', almacenamiento: 'Almacenamiento', placa: 'La placa madre', gpu: 'La tarjeta gráfica', psu: 'La fuente de poder', perifericos: 'Periféricos y puertos', ensamble: 'Arma un PC' };
+const TOPIC_NAMES = { cpu: 'Procesador (CPU)', ram: 'Memoria RAM', almacenamiento: 'Almacenamiento', placa: 'Placa madre', gpu: 'Tarjeta gráfica', psu: 'Fuente de poder', perifericos: 'Periféricos', unidades: 'Unidades de medida' };
+const OPTION_NAMES = { accesible: 'Modo accesible', tutor: 'Tutor IA', tutor_directo: 'Pregunta directa al tutor', videotutoriales: 'Videotutoriales', prueba: 'Prueba diagnóstica', progreso: 'Mi progreso', opinion: 'Opinión', ayuda: 'Ayuda' };
+const EXPORTS = [['usuarios','Usuarios'],['comentarios','Comentarios'],['intentos','Intentos de la prueba'],['temas','Aciertos por tema'],['tutor','Preguntas al tutor'],['videos','Videos'],['eventos','Todos los eventos']];
+
+let KEY = sessionStorage.getItem('cf_key') || '';
+const DATA = {};
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const who = (r) => esc(r.name || 'Sin nombre') + ` <span class="muted">· …${esc(String(r.user_id || r.id || '').replace(/@.*/, '').slice(-4))}</span>`;
+const fmtDate = (d) => d ? d.slice(0, 16).replace(/^(\d{4})-(\d{2})-(\d{2})/, '$3/$2/$1') : '';
+const stars = (n) => n ? '★'.repeat(n) + '<span class="muted">' + '★'.repeat(5 - n) + '</span>' : '<span class="muted">—</span>';
+const num = (v, d = '—') => (v === null || v === undefined) ? d : v;
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, { ...opts, headers: { 'X-Panel-Key': KEY, 'Content-Type': 'application/json', ...(opts.headers || {}) } });
+  if (res.status === 401) { logout(); throw new Error('401'); }
+  if (!res.ok) throw new Error(res.status);
+  return res.json();
+}
+
+// ---- Tooltip ----
+const tip = $('#tip');
+document.addEventListener('mousemove', (e) => {
+  const t = e.target.closest('[data-tip]');
+  if (!t) { tip.style.opacity = 0; return; }
+  tip.textContent = t.dataset.tip;
+  tip.style.left = Math.min(e.clientX + 12, innerWidth - tip.offsetWidth - 8) + 'px';
+  tip.style.top = (e.clientY + 14) + 'px';
+  tip.style.opacity = 1;
+});
+
+// ---- Gráficos ----
+function hbars(el, rows, opts = {}) {
+  const box = typeof el === 'string' ? $(el) : el;
+  if (!rows.length) { box.innerHTML = '<div class="empty-state">Aún no hay datos</div>'; return; }
+  const max = opts.max || Math.max(...rows.map((r) => r.value), 1);
+  box.innerHTML = rows.map((r) => `
+    <div class="bar-row" data-tip="${esc(r.label)}: ${r.value}${opts.suffix || ''}${r.extra ? ' · ' + r.extra : ''}">
+      <div class="name">${esc(r.label)}</div>
+      <div class="track"><div class="fill" style="width:${(100 * r.value / max).toFixed(1)}%"></div></div>
+      <div class="num">${r.value}${opts.suffix || ''}</div>
+    </div>`).join('');
+}
+
+function columns(el, rows) {
+  const box = $(el);
+  if (!rows.length) { box.innerHTML = '<div class="empty-state">Aún no hay actividad</div>'; return; }
+  const max = Math.max(...rows.map((r) => r.value), 1);
+  box.innerHTML = `<div class="cols">${rows.map((r) => `<div class="col" data-tip="${esc(r.full)}: ${r.value} eventos · ${r.users} usuario(s)"><div class="stick" style="height:${(100 * r.value / max).toFixed(1)}%"></div></div>`).join('')}</div>
+    <div class="col-labels">${rows.map((r, i) => `<span>${i % Math.ceil(rows.length / 8) === 0 ? esc(r.label) : ''}</span>`).join('')}</div>`;
+}
+
+// ---- Vistas ----
+function renderSummary() {
+  const s = DATA.summary;
+  const kpi = (label, value, sub = '') => `<div class="card kpi"><div class="label">${label}</div><div class="value">${value}</div><div class="sub">${sub}</div></div>`;
+  const thumbsTotal = s.thumbs_up + s.thumbs_down;
+  $('#kpis').innerHTML =
+    kpi('Estudiantes', s.users, `${s.active_7d} activos en 7 días`) +
+    kpi('Preguntas al tutor', s.tutor_questions, thumbsTotal ? `${Math.round(100 * s.thumbs_up / thumbsTotal)} % de 👍 (${thumbsTotal} valoraciones)` : 'sin valoraciones aún') +
+    kpi('Intentos de la prueba', s.quiz_attempts, `promedio ${num(s.quiz_avg)} %`) +
+    kpi('Videos vistos', s.video_views, 'reproducciones') +
+    kpi('Comentarios', s.feedback_count, `${s.feedback_new} nuevos`) +
+    kpi('Accesibilidad', s.accessible_users, `en modo accesible · ${s.voice_in} audios recibidos · ${s.voice_out} enviados`) +
+    kpi('Satisfacción', s.feedback_avg ? `${s.feedback_avg}<span style="font-size:16px;color:var(--muted)">/5</span>` : '—', 'promedio de estrellas');
+
+  const daily = [...s.daily].reverse().map((d) => ({ label: d.day.slice(8, 10) + '/' + d.day.slice(5, 7), full: fmtDate(d.day), value: d.n, users: d.users }));
+  columns('#chart-daily', daily);
+  hbars('#chart-menu', s.menu_usage.map((m) => ({ label: OPTION_NAMES[m.option] || m.option, value: m.n })));
+  const dist = [5, 4, 3, 2, 1].map((r) => ({ label: '★'.repeat(r), value: (s.rating_dist.find((x) => x.rating === r) || { n: 0 }).n }));
+  hbars('#chart-rating', s.rating_dist.length ? dist : []);
+  const nNew = s.feedback_new;
+  $('#badge-new').innerHTML = nNew ? `<span class="pill nuevo">${nNew}</span>` : '';
+}
+
+function renderFeedback() {
+  const q = $('#fb-search').value.toLowerCase();
+  const st = $('#fb-status').value;
+  const cat = $('#fb-cat').value;
+  const cats = [...new Set(DATA.feedback.map((f) => f.category).filter(Boolean))];
+  const sel = $('#fb-cat');
+  if (sel.options.length - 1 !== cats.length) sel.innerHTML = '<option value="">Todas las categorías</option>' + cats.map((c) => `<option>${esc(c)}</option>`).join('');
+  sel.value = cat;
+  const rows = DATA.feedback.filter((f) =>
+    (!st || f.status === st) && (!cat || f.category === cat) &&
+    (!q || (f.comment || '').toLowerCase().includes(q) || (f.name || '').toLowerCase().includes(q)));
+  $('#fb-list').innerHTML = rows.length ? rows.map((f) => `
+    <div class="card fb">
+      <div class="meta"><span class="stars">${stars(f.rating)}</span><span class="pill">${esc(f.category || 'Sin categoría')}</span><span class="pill ${f.status}">${esc(f.status)}</span><span>${who(f)}</span><span class="muted">${fmtDate(f.created_at)}</span></div>
+      <div class="comment ${f.comment ? '' : 'empty'}">${f.comment ? esc(f.comment) : 'Sin comentario escrito'}</div>
+      <div class="actions">
+        ${f.status !== 'leido' ? `<button data-fb="${f.id}" data-st="leido">Marcar leído</button>` : ''}
+        ${f.status !== 'resuelto' ? `<button data-fb="${f.id}" data-st="resuelto">Marcar resuelto</button>` : ''}
+        ${f.status !== 'nuevo' ? `<button data-fb="${f.id}" data-st="nuevo">Volver a nuevo</button>` : ''}
+      </div>
+    </div>`).join('') : '<div class="card empty-state">No hay comentarios con estos filtros</div>';
+}
+
+function renderQuiz() {
+  const qz = DATA.quiz;
+  hbars('#chart-topics', qz.by_topic.map((t) => ({ label: TOPIC_NAMES[t.topic] || t.topic, value: t.pct, extra: `${t.correct}/${t.answered} correctas` })), { max: 100, suffix: ' %' });
+  $('#tbl-questions').innerHTML = qz.by_question.length
+    ? '<tr><th>Pregunta</th><th>Tema</th><th>Respondida</th><th>Acierto</th></tr>' + qz.by_question.slice(0, 10).map((q) =>
+      `<tr><td>${esc(q.question || q.question_id)}</td><td>${esc(TOPIC_NAMES[q.topic] || q.topic || '—')}</td><td>${q.answered}</td><td><span class="pill ${q.pct < 60 ? 'low' : 'ok'}">${q.pct} %</span></td></tr>`).join('')
+    : '<tr><td class="empty-state">Aún no hay respuestas</td></tr>';
+  $('#tbl-attempts').innerHTML = qz.attempts.length
+    ? '<tr><th>Estudiante</th><th>Puntaje</th><th>%</th><th>Fecha</th></tr>' + qz.attempts.map((a) =>
+      `<tr><td>${who(a)}</td><td>${a.score}/${a.total}</td><td><span class="pill ${a.pct < 60 ? 'low' : 'ok'}">${a.pct} %</span></td><td class="muted">${fmtDate(a.created_at)}</td></tr>`).join('')
+    : '<tr><td class="empty-state">Aún no hay intentos</td></tr>';
+}
+
+function renderTutor() {
+  const q = $('#tutor-search').value.toLowerCase();
+  const f = $('#tutor-filter').value;
+  const rows = DATA.tutor.filter((r) =>
+    (!q || (r.question || '').toLowerCase().includes(q)) &&
+    (!f || (f === 'contingencia' ? r.source === 'contingencia' : String(r.rating) === f)));
+  $('#tbl-tutor').innerHTML = rows.length
+    ? '<tr><th>Pregunta y respuesta</th><th>Estudiante</th><th>Valoración</th><th>Fecha</th></tr>' + rows.map((r) => `
+      <tr><td><details class="qa"><summary>${esc(r.question)} ${r.source === 'contingencia' ? '<span class="pill low">sin IA</span>' : ''}</summary><div class="answer">${esc(r.answer || 'Sin respuesta registrada')}</div></details></td>
+      <td>${who(r)}</td><td>${r.rating === 1 ? '👍' : r.rating === -1 ? '👎' : '<span class="muted">—</span>'}</td><td class="muted">${fmtDate(r.created_at)}</td></tr>`).join('')
+    : '<tr><td class="empty-state">No hay preguntas con estos filtros</td></tr>';
+}
+
+function renderVideos() {
+  hbars('#chart-videos', DATA.videos.map((v) => ({ label: VIDEO_NAMES[v.video] || v.video, value: v.views, extra: `${v.users} estudiante(s)` })));
+  $('#tbl-videos').innerHTML = DATA.videos.length
+    ? '<tr><th>Video</th><th>Vistas</th><th>Estudiantes</th><th>Última</th></tr>' + DATA.videos.map((v) =>
+      `<tr><td>${esc(VIDEO_NAMES[v.video] || v.video)}</td><td>${v.views}</td><td>${v.users}</td><td class="muted">${fmtDate(v.last_view)}</td></tr>`).join('')
+    : '<tr><td class="empty-state">Aún no se han visto videos</td></tr>';
+}
+
+function renderUsers() {
+  const q = $('#user-search').value.toLowerCase();
+  const rows = DATA.users.filter((u) => !q || (u.name || '').toLowerCase().includes(q));
+  $('#tbl-users').innerHTML = rows.length
+    ? '<tr><th>Estudiante</th><th>Preguntas</th><th>Intentos</th><th>Promedio</th><th>Videos</th><th>Comentarios</th><th>Primera vez</th><th>Última vez</th></tr>' + rows.map((u) =>
+      `<tr><td>${who(u)}</td><td>${u.questions}</td><td>${u.attempts}</td><td>${u.avg_pct === null ? '—' : u.avg_pct + ' %'}</td><td>${u.videos}</td><td>${u.feedback}</td><td class="muted">${fmtDate(u.first_seen)}</td><td class="muted">${fmtDate(u.last_seen)}</td></tr>`).join('')
+    : '<tr><td class="empty-state">Sin usuarios</td></tr>';
+}
+
+// ---- Estado de la IA (Groq) ----
+async function loadIaStatus(force = false) {
+  const box = $('#ia-status');
+  try {
+    const st = await fetch('/api/ia-status' + (force ? '?force=true' : '')).then((r) => r.json());
+    const cls = st.state === 'ok' ? 'ok' : st.state === 'bajo' ? 'bajo' : 'bad';
+    const lim = st.requests_day_limit, rem = st.requests_day_remaining;
+    const pct = lim && rem !== null && rem !== undefined ? Math.max(0, Math.min(100, 100 * rem / lim)) : null;
+    const extra = [];
+    if (st.tokens_min_limit) extra.push(`Límite por minuto: ${st.tokens_min_limit.toLocaleString('es-CO')} tokens`);
+    extra.push(`Modelo ${st.model}`);
+    extra.push('El cupo gratuito se recupera solo con el tiempo (ventana de 24 h)');
+    box.className = 'card ia-status ' + cls;
+    box.innerHTML = `<span class="dot"></span>
+      <div class="txt"><b>${esc(st.message)}</b><small>${esc(extra.join(' · '))}</small></div>
+      ${pct !== null ? `<div class="ia-meter" data-tip="${rem} de ${lim} solicitudes disponibles"><i style="width:${pct.toFixed(1)}%"></i></div>` : ''}
+      <button id="ia-recheck" title="Volver a revisar">Revisar</button>`;
+    $('#ia-recheck').onclick = () => { box.querySelector('b').textContent = 'Revisando la IA…'; loadIaStatus(true); };
+  } catch (_) {
+    box.className = 'card ia-status bad';
+    box.innerHTML = '<span class="dot"></span><div class="txt"><b>No se pudo revisar el estado de la IA</b></div>';
+  }
+}
+
+async function loadAll() {
+  $('#updated').textContent = 'Actualizando…';
+  try {
+    const [summary, feedback, quiz, tutor, videos, users] = await Promise.all([
+      api('/api/admin/summary'), api('/api/admin/feedback'), api('/api/admin/quiz'),
+      api('/api/admin/tutor'), api('/api/admin/videos'), api('/api/admin/users')]);
+    Object.assign(DATA, { summary, feedback, quiz, tutor, videos, users });
+    renderSummary(); renderFeedback(); renderQuiz(); renderTutor(); renderVideos(); renderUsers();
+    $('#updated').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+  } catch (e) {
+    if (e.message !== '401') $('#updated').textContent = '⚠️ No se pudo conectar con el servicio';
+  }
+}
+
+// ---- Eventos ----
+$('#tabs').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-view]');
+  if (!b) return;
+  document.querySelectorAll('#tabs button').forEach((x) => x.classList.toggle('active', x === b));
+  document.querySelectorAll('section.view').forEach((v) => v.classList.toggle('active', v.id === 'view-' + b.dataset.view));
+  try { sessionStorage.setItem('cf_tab', b.dataset.view); } catch (_) {}
+});
+$('#fb-list').addEventListener('click', async (e) => {
+  const b = e.target.closest('button[data-fb]');
+  if (!b) return;
+  await api(`/api/admin/feedback/${b.dataset.fb}`, { method: 'PATCH', body: JSON.stringify({ status: b.dataset.st }) });
+  loadAll();
+});
+['#fb-search', '#fb-status', '#fb-cat'].forEach((s) => $(s).addEventListener('input', renderFeedback));
+['#tutor-search', '#tutor-filter'].forEach((s) => $(s).addEventListener('input', renderTutor));
+$('#user-search').addEventListener('input', renderUsers);
+$('#refresh').addEventListener('click', loadAll);
+$('#logout').addEventListener('click', logout);
+
+function renderExports() {
+  $('#exports').innerHTML = EXPORTS.map(([k, label]) => `<a class="btn" href="/api/admin/export/${k}.csv?key=${encodeURIComponent(KEY)}">⬇ ${label}</a>`).join('');
+}
+
+function logout() {
+  KEY = ''; try { sessionStorage.removeItem('cf_key'); } catch (_) {}
+  $('#app').hidden = true; $('#login').style.display = '';
+}
+
+async function enter() {
+  try {
+    await api('/api/admin/check');
+    try { sessionStorage.setItem('cf_key', KEY); } catch (_) {}
+    $('#login').style.display = 'none'; $('#app').hidden = false;
+    renderExports();
+    loadIaStatus();
+    const tab = sessionStorage.getItem('cf_tab');
+    if (tab) document.querySelector(`#tabs button[data-view="${tab}"]`)?.click();
+    loadAll();
+  } catch (e) {
+    $('#login-err').textContent = 'Clave incorrecta o servicio apagado.';
+  }
+}
+
+$('#login-form').addEventListener('submit', (e) => { e.preventDefault(); KEY = $('#pwd').value.trim(); enter(); });
+setInterval(() => { if (!$('#app').hidden && !document.hidden) loadAll(); }, 30000);
+if (KEY) enter();
+</script>
+</body>
+</html>

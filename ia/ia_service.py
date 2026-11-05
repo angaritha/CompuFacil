@@ -1,189 +1,173 @@
 """
 ia_service.py
 Motor de IA de CompuFácil. Usa la API de Groq (compatible con el SDK de OpenAI)
-para generar respuestas de tutoría rápidas, con contingencia local si Groq falla.
+para responder como tutor de hardware, recordando la conversación reciente de
+cada estudiante. Si Groq falla, responde con contenido local de contingencia.
 """
 
-import os
 import logging
-from dotenv import load_dotenv
+import os
+import re
+
 import openai
+from dotenv import load_dotenv
 from openai import AsyncOpenAI
 
 logger = logging.getLogger("ia_service")
 logging.basicConfig(level=logging.INFO)
 
-# Carga automáticamente el archivo .env (si existe) para no tener que
-# exportar la variable manualmente cada vez que se arranca el servicio.
 load_dotenv()
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "TU_API_KEY_DE_GROQ_AQUI")
-# 'llama-3.3-70b-versatile' fue descontinuado por Groq el 16/08/2026.
-# Reemplazo oficial recomendado por Groq: openai/gpt-oss-120b.
-# Configurable por variable de entorno para futuras migraciones sin tocar código.
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+# Modelo configurable por .env para futuras migraciones sin tocar código.
 MODEL_NAME = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+MAX_RESPONSE_TOKENS = int(os.getenv("GROQ_MAX_TOKENS", "700"))
+# gpt-oss "razona" antes de responder; en "low" responde más rápido y gasta
+# menos tokens del plan gratuito.
+REASONING_EFFORT = os.getenv("GROQ_REASONING_EFFORT", "low")
 
-# openai/gpt-oss-120b en el plan free de Groq tiene 8,000 tokens/minuto y
-# 200,000 tokens/día. Con max_tokens=500 (en vez de 850) casi se duplica la
-# cantidad real de peticiones que caben en esos límites, manteniendo
-# respuestas de 2-3 párrafos completos.
-MAX_RESPONSE_TOKENS = int(os.getenv("GROQ_MAX_TOKENS", "500"))
-
-# Cliente asíncrono apuntando a Groq (obligatorio por velocidad de respuesta,
-# evita bloqueos por cuota con 15+ usuarios concurrentes).
 client = AsyncOpenAI(
-    api_key=GROQ_API_KEY,
+    api_key=GROQ_API_KEY or "sin-clave",
     base_url="https://api.groq.com/openai/v1",
 )
 
-FOOTER = (
-    "\n\n━━━━━━━━━━━━━━━━━━━━\n"
-    "💬 _¿Quieres preguntar algo más o regresar al *MENU*?_"
-)
-
 SYSTEM_PROMPT = (
-    "Eres 'CompuFácil', un tutor universitario experto en hardware y "
-    "computación: CPU, RAM, ROM, almacenamiento (SSD/HDD), tarjetas "
-    "gráficas/GPU, placas madre, periféricos, generaciones y modelos de "
-    "componentes (incluye lanzamientos recientes o de 2026), mantenimiento "
-    "de equipos, comparativas entre componentes, y temas afines de "
-    "arquitectura de computadoras. Tu tono es cercano, paciente y didáctico.\n\n"
-    "Responde SIEMPRE en español, con el desarrollo que la pregunta merezca "
-    "(puedes usar hasta 3-4 párrafos si el tema lo amerita, no te limites a "
-    "una respuesta demasiado corta). Usa *negritas* (formato WhatsApp, con "
-    "asteriscos simples) para resaltar los conceptos clave técnicos. No uses "
-    "encabezados de markdown; puedes usar guiones simples para listas breves "
-    "si ayuda a la claridad. Mantén un tono conversacional, como si le "
-    "explicaras a un estudiante de primer semestre de informática.\n\n"
-    "Solo debes rechazar preguntas que NO tengan relación alguna con "
-    "hardware, computación o tecnología (por ejemplo: tareas de otras "
-    "materias, temas personales, política, salud, etc.). Ante esos casos, "
-    "responde en un solo párrafo breve indicando que solo puedes ayudar con "
-    "temas de hardware y computación. Cualquier pregunta relacionada con "
-    "componentes de computador, comparativas entre ellos, o tecnología en "
-    "general SÍ debes responderla con gusto."
+    "Eres *CompuFácil*, un tutor universitario de hardware y computación que "
+    "atiende por WhatsApp a estudiantes de primer semestre de Ingeniería de "
+    "Sistemas de la Fundación Universitaria San Mateo (Colombia). Muchos "
+    "llegan con pocos conocimientos previos.\n\n"
+    "Temas: CPU, RAM, ROM, almacenamiento (HDD, SSD, NVMe), placa madre, GPU, "
+    "fuente de poder, periféricos, puertos, unidades de medida (bits, bytes, "
+    "GB, GHz), ensamble, mantenimiento, compatibilidad entre componentes, "
+    "comparativas y novedades de hardware, y temas afines de arquitectura de "
+    "computadores.\n\n"
+    "Cómo respondes:\n"
+    "- Siempre en español, con tono cercano, paciente y motivador.\n"
+    "- Explica primero la idea central en palabras sencillas y luego el "
+    "detalle técnico. Usa analogías de la vida cotidiana cuando ayuden.\n"
+    "- Entre 1 y 3 párrafos cortos; si el tema lo exige, una lista breve con "
+    "guiones. Nada de respuestas larguísimas: es un chat de celular.\n"
+    "- Formato de WhatsApp: *negrita* con un asterisco, _cursiva_ con guion "
+    "bajo. No uses títulos con #, tablas, ** dobles ni fórmulas LaTeX.\n"
+    "- Tienes en cuenta lo que se habló antes en la conversación: si el "
+    "estudiante dice '¿y la otra?' o 'explícalo más fácil', entiende a qué se "
+    "refiere.\n"
+    "- Si la pregunta es ambigua, responde lo más probable y ofrece aclarar.\n"
+    "- No inventes cifras ni modelos; si no estás seguro de un dato reciente, "
+    "dilo.\n"
+    "- Si te piden resolver una tarea o examen, guía con explicaciones y "
+    "pistas en lugar de entregar solo la respuesta final.\n\n"
+    "Si la pregunta no tiene relación con hardware, computación o tecnología "
+    "(otras materias, temas personales, política, salud, etc.), responde en "
+    "una o dos frases amables que solo puedes ayudar con hardware y "
+    "computación, y sugiere un tema relacionado."
 )
 
-# --- Contingencia local basada en palabras clave si Groq falla ---
-# Cada tema tiene una lista de SINÓNIMOS: si el mensaje del usuario contiene
-# cualquiera de ellos (venga como "¿qué es...?", "¿cómo funciona...?", etc.,
-# no importa la forma de la pregunta), se devuelve esa respuesta local.
 FALLBACK_TOPICS = [
     {
-        "keywords": ["ram", "memoria ram"],
+        "keywords": ["ram", "memoria ram", "ddr"],
         "response": (
-            "La *memoria RAM* (Random Access Memory) es la memoria volátil donde "
-            "el computador guarda temporalmente los datos y programas que está "
-            "usando en este momento. Se llama volátil porque su contenido se "
-            "borra al apagar el equipo.\n\n"
-            "A mayor *capacidad de RAM*, más programas puede manejar el sistema "
-            "de forma fluida al mismo tiempo."
+            "La *memoria RAM* es la memoria de trabajo del computador: guarda de "
+            "forma *temporal* los datos y programas que estás usando en ese "
+            "momento. Es *volátil*, es decir, se borra al apagar el equipo.\n\n"
+            "Piensa en ella como el escritorio donde pones lo que estás usando: "
+            "entre más grande, más cosas puedes tener abiertas a la vez sin que "
+            "el equipo se ponga lento."
         ),
     },
     {
-        "keywords": ["cpu", "procesador", "microprocesador"],
+        "keywords": ["cpu", "procesador", "microprocesador", "nucleo", "núcleo"],
         "response": (
-            "El *CPU* (Unidad Central de Procesamiento) es el 'cerebro' del "
-            "computador: se encarga de ejecutar las instrucciones de los "
-            "programas mediante operaciones aritméticas y lógicas.\n\n"
-            "Su velocidad se mide en *GHz* y su rendimiento también depende del "
-            "número de *núcleos (cores)* que tenga."
+            "El *CPU* o procesador es el 'cerebro' del computador: ejecuta las "
+            "instrucciones de los programas mediante operaciones aritméticas y "
+            "lógicas.\n\n"
+            "Su rendimiento depende de la *frecuencia* (medida en *GHz*), del "
+            "número de *núcleos* y de su arquitectura."
         ),
     },
     {
-        "keywords": ["ssd", "disco solido", "disco sólido", "estado solido"],
+        "keywords": ["ssd", "nvme", "disco solido", "disco sólido", "estado solido", "estado sólido"],
         "response": (
-            "Un *SSD* (Solid State Drive) usa memoria flash sin partes móviles, "
-            "por lo que es mucho más *rápido* y resistente a golpes que un HDD "
-            "tradicional.\n\n"
-            "Esto se traduce en tiempos de *arranque* e *inicio de aplicaciones* "
-            "considerablemente menores."
+            "Un *SSD* guarda la información en memoria flash, sin partes "
+            "móviles. Por eso es mucho más *rápido* y resistente a golpes que un "
+            "disco duro tradicional.\n\n"
+            "En la práctica se nota en que el equipo *arranca* y abre los "
+            "programas en segundos."
         ),
     },
     {
         "keywords": ["hdd", "disco duro", "disco mecanico", "disco mecánico"],
         "response": (
-            "Un *HDD* (Hard Disk Drive) almacena información en discos "
-            "magnéticos giratorios leídos por un cabezal mecánico.\n\n"
-            "Es más *económico* por gigabyte que un SSD, pero más lento y frágil "
-            "ante golpes o caídas."
+            "Un *HDD* o disco duro guarda la información en platos magnéticos "
+            "que giran y un cabezal que los lee.\n\n"
+            "Es más *económico* por gigabyte que un SSD, pero más lento y "
+            "frágil ante golpes."
         ),
     },
     {
-        "keywords": ["rom", "memoria rom"],
+        "keywords": ["rom", "memoria rom", "bios", "uefi", "firmware"],
         "response": (
-            "La *ROM* (Read Only Memory) es una memoria de solo lectura que "
-            "guarda instrucciones básicas y permanentes (como el firmware de "
-            "arranque), a diferencia de la RAM, que es temporal y se borra al "
-            "apagar el equipo.\n\n"
-            "La ROM no se pierde sin energía; por eso el computador 'recuerda' "
-            "cómo iniciar cada vez que lo enciendes."
+            "La *ROM* es una memoria de solo lectura que conserva instrucciones "
+            "básicas y permanentes, como el *firmware* de arranque (BIOS/UEFI). "
+            "A diferencia de la RAM, no se borra al apagar el equipo.\n\n"
+            "Gracias a ella el computador 'sabe' cómo iniciar cada vez que lo "
+            "enciendes."
         ),
     },
     {
-        "keywords": [
-            "gpu", "tarjeta grafica", "tarjeta gráfica",
-            "tarjeta de video", "tarjeta de vídeo",
-        ],
+        "keywords": ["gpu", "tarjeta grafica", "tarjeta gráfica", "tarjeta de video", "tarjeta de vídeo"],
         "response": (
-            "La *GPU* o tarjeta gráfica es el componente encargado de procesar "
-            "y renderizar imágenes, video y gráficos 3D, liberando esa carga del "
-            "CPU.\n\n"
-            "Es especialmente importante para videojuegos, edición de video y "
-            "tareas de inteligencia artificial."
+            "La *GPU* o tarjeta gráfica procesa imágenes, video y gráficos 3D, "
+            "y así le quita esa carga al CPU.\n\n"
+            "Es clave en videojuegos, edición de video, diseño y en tareas de "
+            "inteligencia artificial."
         ),
     },
     {
-        "keywords": ["placa madre", "motherboard", "placa base"],
+        "keywords": ["placa madre", "motherboard", "placa base", "tarjeta madre"],
         "response": (
-            "La *placa madre (motherboard)* es el componente que conecta y "
-            "permite la comunicación entre todos los demás: CPU, RAM, "
-            "almacenamiento, tarjeta gráfica, etc.\n\n"
-            "Es literalmente la base física sobre la que se arma todo el "
-            "computador."
+            "La *placa madre* es la tarjeta principal donde se conectan todos "
+            "los componentes: CPU, RAM, almacenamiento, GPU y periféricos. "
+            "Permite que se comuniquen entre sí.\n\n"
+            "Es como la ciudad con sus calles: sin ella, los componentes no "
+            "tendrían cómo hablarse."
         ),
     },
     {
-        "keywords": ["fuente de poder", "fuente de alimentacion", "fuente de alimentación", "psu"],
+        "keywords": ["fuente de poder", "fuente de alimentacion", "fuente de alimentación", "psu", "vatios", "watts"],
         "response": (
-            "La *fuente de poder (PSU)* convierte la corriente eléctrica de la "
-            "toma de pared en la energía que necesitan los componentes internos "
-            "del computador para funcionar.\n\n"
-            "Elegir una de buena calidad y con la potencia adecuada protege al "
-            "resto del hardware."
+            "La *fuente de poder (PSU)* convierte la corriente alterna del "
+            "tomacorriente en corriente continua para los componentes "
+            "internos.\n\n"
+            "Elegir una de buena calidad y con la *potencia* adecuada protege "
+            "al resto del hardware."
         ),
     },
     {
-        "keywords": ["usb", "puerto usb"],
+        "keywords": ["usb", "puerto", "hdmi", "periferico", "periférico", "teclado", "mouse", "monitor"],
         "response": (
-            "Un puerto *USB* permite conectar dispositivos externos al "
-            "computador, como memorias, mouse, teclados o discos, y transferir "
-            "datos o energía entre ellos.\n\n"
-            "Existen varias versiones (USB 2.0, 3.0, USB-C) que varían "
-            "principalmente en velocidad de transferencia."
+            "Los *periféricos* son los dispositivos que se conectan al "
+            "computador: de *entrada* (teclado, mouse, micrófono), de *salida* "
+            "(monitor, impresora, parlantes) o de *entrada y salida* (memoria "
+            "USB, pantalla táctil).\n\n"
+            "Se conectan por *puertos* como USB, HDMI o de audio, que varían en "
+            "velocidad y en el tipo de señal que transmiten."
         ),
     },
 ]
 
 FALLBACK_DEFAULT = (
-    "En este momento el motor de inteligencia artificial está temporalmente "
-    "fuera de servicio (puede ser un límite de uso), pero con gusto te doy "
-    "una idea general: la *arquitectura de computadoras* estudia cómo "
-    "interactúan el *CPU*, la *RAM*, la *GPU* y el *almacenamiento* para "
-    "ejecutar tareas.\n\n"
-    "Intenta reformular tu pregunta usando un término más específico (RAM, "
-    "CPU, GPU, SSD, HDD, ROM, placa madre, fuente de poder, USB...), o "
-    "vuelve a intentarlo en un par de minutos."
+    "En este momento el Tutor IA está muy ocupado (puede ser un límite de uso "
+    "temporal) 😅. Mientras tanto: la *arquitectura de un computador* se basa "
+    "en cómo trabajan juntos el *CPU*, la *RAM*, el *almacenamiento* y la "
+    "*placa madre*.\n\n"
+    "Intenta de nuevo en un par de minutos, o pregunta usando un término "
+    "concreto (RAM, CPU, GPU, SSD, HDD, placa madre, fuente de poder, USB…). "
+    "También puedes ver los *videotutoriales* desde el MENU."
 )
 
 
-def _fallback_response(user_message: str) -> str:
-    """
-    Respuesta local de contingencia. Busca cualquier sinónimo conocido del
-    tema dentro del mensaje del usuario, sin importar si la pregunta viene
-    en forma de '¿qué es...?', '¿cómo funciona...?' u otra redacción —
-    solo importa que el término aparezca en el texto.
-    """
+def fallback_response(user_message: str) -> str:
     text = user_message.lower()
     for topic in FALLBACK_TOPICS:
         if any(keyword in text for keyword in topic["keywords"]):
@@ -191,38 +175,127 @@ def _fallback_response(user_message: str) -> str:
     return FALLBACK_DEFAULT
 
 
-async def get_ai_response(user_message: str, history: list | None = None) -> str:
+def to_whatsapp(text: str) -> str:
+    """Convierte restos de markdown al formato de WhatsApp."""
+    text = re.sub(r"\*\*(.+?)\*\*", r"*\1*", text, flags=re.S)
+    text = re.sub(r"__(.+?)__", r"_\1_", text, flags=re.S)
+    text = re.sub(r"^\s*#{1,6}\s*(.+)$", r"*\1*", text, flags=re.M)
+    text = re.sub(r"^\s*[\*•]\s+", "- ", text, flags=re.M)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+async def _complete(messages: list[dict], with_reasoning: bool):
+    kwargs = dict(
+        model=MODEL_NAME,
+        messages=messages,
+        temperature=0.5,
+        max_tokens=MAX_RESPONSE_TOKENS,
+        timeout=25.0,
+    )
+    if with_reasoning and REASONING_EFFORT:
+        kwargs["extra_body"] = {"reasoning_effort": REASONING_EFFORT}
+    return await client.chat.completions.create(**kwargs)
+
+
+async def get_ai_response(user_message: str, history: list | None = None) -> tuple[str, str]:
     """
-    Consulta a Groq y devuelve la respuesta ya formateada con el pie de
-    página estándar. Si Groq falla (por cualquier motivo: límite de uso,
-    llave inválida, timeout, etc.), usa la contingencia local.
+    Devuelve (respuesta, origen). origen = "ia" si respondió Groq o
+    "contingencia" si se usó la respuesta local.
     """
+    if not GROQ_API_KEY:
+        logger.error("Falta GROQ_API_KEY en ia/.env")
+        return fallback_response(user_message), "contingencia"
+
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     if history:
         messages.extend(history)
     messages.append({"role": "user", "content": user_message})
 
     try:
-        completion = await client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=messages,
-            temperature=0.6,
-            max_tokens=MAX_RESPONSE_TOKENS,
-            timeout=25.0,
-        )
-        content = completion.choices[0].message.content.strip()
-        return content + FOOTER
+        try:
+            completion = await _complete(messages, with_reasoning=True)
+        except openai.BadRequestError as exc:
+            logger.warning(f"Reintentando sin reasoning_effort: {exc}")
+            completion = await _complete(messages, with_reasoning=False)
+        content = (completion.choices[0].message.content or "").strip()
+        if not content:
+            return fallback_response(user_message), "contingencia"
+        return to_whatsapp(content), "ia"
     except openai.RateLimitError as exc:
-        # Límite de tokens/peticiones por minuto o por día alcanzado.
-        # Generar una nueva API Key NO soluciona esto: el límite es por
-        # cuenta/organización, se resetea solo (por minuto o al día
-        # siguiente), o se sube activando el Developer tier en Groq.
-        logger.warning(f"Límite de uso (TPM/TPD) alcanzado en Groq: {exc}")
-        return _fallback_response(user_message) + FOOTER
+        logger.warning(f"Límite de uso de Groq alcanzado: {exc}")
     except openai.AuthenticationError as exc:
-        # Esta sí es una API Key inválida/revocada: hay que reemplazarla.
         logger.error(f"API Key de Groq inválida o revocada: {exc}")
-        return _fallback_response(user_message) + FOOTER
     except Exception as exc:
         logger.error(f"Error al conectar con Groq: {exc}")
-        return _fallback_response(user_message) + FOOTER
+    return fallback_response(user_message), "contingencia"
+
+
+# ---------------------------------------------------------------------------
+# Estado de la API de Groq (clave y cupo del plan)
+# ---------------------------------------------------------------------------
+
+_STATUS_CACHE: dict = {"at": 0.0, "data": None}
+STATUS_TTL = 300  # segundos; cada revisión gasta 1 solicitud del cupo diario
+
+
+def _to_int(value):
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return None
+
+
+def _limits_from(headers) -> dict:
+    return {
+        "requests_day_limit": _to_int(headers.get("x-ratelimit-limit-requests")),
+        "requests_day_remaining": _to_int(headers.get("x-ratelimit-remaining-requests")),
+        "requests_reset_in": headers.get("x-ratelimit-reset-requests"),
+        "tokens_min_limit": _to_int(headers.get("x-ratelimit-limit-tokens")),
+        "tokens_min_remaining": _to_int(headers.get("x-ratelimit-remaining-tokens")),
+        "tokens_reset_in": headers.get("x-ratelimit-reset-tokens"),
+        "retry_after": headers.get("retry-after"),
+    }
+
+
+async def ia_status(force: bool = False) -> dict:
+    """Prueba la clave de Groq con una solicitud mínima y lee el cupo restante."""
+    import time
+
+    now = time.time()
+    if not force and _STATUS_CACHE["data"] and now - _STATUS_CACHE["at"] < STATUS_TTL:
+        return _STATUS_CACHE["data"]
+
+    base = {"model": MODEL_NAME, "key_configured": bool(GROQ_API_KEY), "checked_at": int(now)}
+    if not GROQ_API_KEY:
+        data = {**base, "state": "sin_clave", "message": "No hay GROQ_API_KEY en ia/.env"}
+    else:
+        try:
+            raw = await client.chat.completions.with_raw_response.create(
+                model=MODEL_NAME,
+                messages=[{"role": "user", "content": "ok"}],
+                max_tokens=16,
+                timeout=20.0,
+            )
+            limits = _limits_from(raw.headers)
+            remaining = limits["requests_day_remaining"]
+            state = "ok" if remaining is None or remaining > 50 else "bajo"
+            msg = "La IA está activa"
+            if remaining is not None and limits["requests_day_limit"]:
+                msg += f": quedan {remaining} de {limits['requests_day_limit']} solicitudes del día"
+            data = {**base, **limits, "state": state, "message": msg}
+        except openai.AuthenticationError:
+            data = {**base, "state": "clave_invalida",
+                    "message": "La clave de Groq no es válida o fue revocada. Crea otra en console.groq.com"}
+        except openai.RateLimitError as exc:
+            limits = _limits_from(exc.response.headers)
+            wait = limits.get("retry_after") or limits.get("requests_reset_in") or "unos minutos"
+            data = {**base, **limits, "state": "agotado",
+                    "message": f"Se agotó el cupo gratuito de Groq; se libera en {wait}. Mientras tanto el tutor usa respuestas de contingencia"}
+        except openai.APIConnectionError:
+            data = {**base, "state": "sin_conexion", "message": "No hay conexión con Groq (revisa el internet)"}
+        except Exception as exc:  # noqa: BLE001
+            data = {**base, "state": "error", "message": f"Groq respondió con un error: {str(exc)[:160]}"}
+
+    _STATUS_CACHE.update(at=now, data=data)
+    return data

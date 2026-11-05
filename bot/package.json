@@ -1,13 +1,15 @@
 {
   "name": "compufacil-bot",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Bot de WhatsApp educativo CompuFacil",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js"
+    "start": "node bot.js",
+    "test": "node test/simulate.js"
   },
   "dependencies": {
-    "@wppconnect-team/wppconnect": "^2.3.3",
+    "@wppconnect-team/wppconnect": "^2.3.6",
+    "@wppconnect/wa-js": "^4.7.2",
     "axios": "^1.20.0"
   }
 }

@@ -8,13 +8,25 @@ __pycache__/
 bot/node_modules/
 node_modules/
 
-# Archivos de sesión y tokens de WhatsApp
+# Sesión de WhatsApp y estado de conversaciones
 bot/tokens/
+bot/data/
 
-# Variables de entorno y contraseñas (¡SÚPER IMPORTANTE!)
+# Base de datos con datos de estudiantes (no subir a GitHub)
+ia/compufacil.db
+ia/compufacil.db-*
+
+# Videos (pesados; se guardan en Drive)
+bot/assets/videos/*.mp4
+
+# Variables de entorno y contraseñas
 ia/.env
 .env
 
 # Archivos basura del sistema
 .DS_Store
 Thumbs.db
+
+# Lanzador
+logs/
+.compufacil/
