@@ -14,7 +14,7 @@ import re
 
 from dotenv import load_dotenv
 
-from ia_service import GROQ_API_KEY, client
+import ia_service
 
 load_dotenv()
 logger = logging.getLogger("voice")
@@ -54,12 +54,12 @@ def speech_text(text: str) -> str:
 
 
 async def transcribe(audio: bytes, mimetype: str = "audio/ogg") -> str | None:
-    if not GROQ_API_KEY:
+    if not ia_service.GROQ_API_KEY:
         logger.error("Falta GROQ_API_KEY para transcribir audios")
         return None
     ext = "ogg" if "ogg" in mimetype else "mp3" if "mpeg" in mimetype else "m4a" if "mp4" in mimetype else "ogg"
     try:
-        result = await client.audio.transcriptions.create(
+        result = await ia_service.client.audio.transcriptions.create(
             model=STT_MODEL,
             file=(f"nota.{ext}", audio, mimetype.split(";")[0]),
             language="es",

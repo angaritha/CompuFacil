@@ -31,6 +31,14 @@ client = AsyncOpenAI(
     base_url="https://api.groq.com/openai/v1",
 )
 
+
+def set_api_key(key: str) -> None:
+    """Cambia la clave de Groq en caliente (desde el panel)."""
+    global GROQ_API_KEY
+    GROQ_API_KEY = key
+    client.api_key = key or "sin-clave"
+    _STATUS_CACHE.update(at=0.0, data=None)
+
 SYSTEM_PROMPT = (
     "Eres *CompuFácil*, un tutor universitario de hardware y computación que "
     "atiende por WhatsApp a estudiantes de primer semestre de Ingeniería de "
@@ -299,7 +307,7 @@ async def ia_status(force: bool = False) -> dict:
 
     base = {"model": MODEL_NAME, "key_configured": bool(GROQ_API_KEY), "checked_at": int(now)}
     if not GROQ_API_KEY:
-        data = {**base, "state": "sin_clave", "message": "No hay GROQ_API_KEY en ia/.env"}
+        data = {**base, "state": "sin_clave", "message": "No hay clave de Groq: agrégala en el panel → Ajustes (o en ia/.env)"}
     else:
         try:
             raw = await client.chat.completions.with_raw_response.create(

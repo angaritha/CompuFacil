@@ -20,10 +20,13 @@ from fastapi.responses import FileResponse, RedirectResponse, Response, Streamin
 from pydantic import BaseModel, Field
 
 import base64
+import re
+import time
 
 import content_admin
 import db
 import voice
+import ia_service
 from ia_service import get_ai_response, ia_status
 
 load_dotenv()
@@ -214,8 +217,18 @@ async def tts(payload: TTSRequest):
 # Panel de administración
 # ---------------------------------------------------------------------------
 
-def require_admin(x_panel_key: str | None = Header(None), key: str | None = Query(None)):
+_FAILS: dict = {}
+
+
+def require_admin(request: Request, x_panel_key: str | None = Header(None), key: str | None = Query(None)):
+    # Detrás del proxy HTTPS (servidor) la IP real viene en X-Forwarded-For.
+    ip = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "")).split(",")[0].strip()
+    now_ts = time.time()
+    fails = [t for t in _FAILS.get(ip, []) if now_ts - t < 600]
+    if len(fails) >= 10:
+        raise HTTPException(status_code=429, detail="Demasiados intentos. Espera unos minutos.")
     if (x_panel_key or key) != PANEL_PASSWORD:
+        _FAILS[ip] = fails + [now_ts]
         raise HTTPException(status_code=401, detail="Clave del panel incorrecta")
     return True
 
@@ -269,6 +282,87 @@ def admin_videos(_: bool = Depends(require_admin)):
 @app.get("/api/admin/users")
 def admin_users(_: bool = Depends(require_admin)):
     return db.admin_users()
+
+
+# ---- Estado del bot de WhatsApp (QR para vincular desde el panel) -----------
+
+BOT_STATUS: dict = {"state": "desconocido", "qr": None, "updated": 0}
+LOCAL_HOSTS = {"127.0.0.1", "::1", "localhost", "testclient"}
+
+
+@app.post("/api/bot/status")
+def bot_status_update(request: Request, payload: dict = Body(...)):
+    if request.client and request.client.host not in LOCAL_HOSTS:
+        raise HTTPException(status_code=403, detail="Solo el bot local puede informar su estado")
+    state = str(payload.get("state") or "desconocido")[:40]
+    BOT_STATUS["state"] = state
+    BOT_STATUS["updated"] = int(time.time())
+    if state == "qr":
+        BOT_STATUS["qr"] = str(payload.get("qr") or "")[:20000] or None
+    elif state in ("isLogged", "inChat", "qrReadSuccess", "connected", "successChat"):
+        BOT_STATUS["qr"] = None
+    if payload.get("detail"):
+        BOT_STATUS["detail"] = str(payload["detail"])[:200]
+    return {"ok": True}
+
+
+@app.get("/api/admin/bot")
+def admin_bot(_: bool = Depends(require_admin)):
+    age = int(time.time()) - BOT_STATUS["updated"] if BOT_STATUS["updated"] else None
+    return {**BOT_STATUS, "age": age}
+
+
+# ---- Ajustes (clave de Groq y clave del panel) --------------------------------
+
+ENV_FILE = Path(__file__).with_name(".env")
+
+
+def _write_env(updates: dict) -> None:
+    lines = ENV_FILE.read_text(encoding="utf-8").splitlines() if ENV_FILE.exists() else []
+    done = set()
+    for i, line in enumerate(lines):
+        m = re.match(r"^\s*([A-Z_][A-Z0-9_]*)\s*=", line)
+        if m and m.group(1) in updates:
+            lines[i] = f"{m.group(1)}={updates[m.group(1)]}"
+            done.add(m.group(1))
+    lines += [f"{k}={v}" for k, v in updates.items() if k not in done]
+    tmp = ENV_FILE.with_suffix(".tmp")
+    tmp.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    os.replace(tmp, ENV_FILE)
+
+
+@app.get("/api/admin/settings")
+def admin_settings(_: bool = Depends(require_admin)):
+    key = ia_service.GROQ_API_KEY
+    return {
+        "groq_configured": bool(key),
+        "groq_hint": f"…{key[-4:]}" if len(key) > 8 else "",
+        "panel_password_default": PANEL_PASSWORD == "compu2026",
+    }
+
+
+@app.post("/api/admin/settings")
+def admin_settings_save(payload: dict = Body(...), _: bool = Depends(require_admin)):
+    global PANEL_PASSWORD
+    updates = {}
+    key = str(payload.get("groq_api_key") or "").strip()
+    if key:
+        if not re.match(r"^gsk_[A-Za-z0-9]{20,}$", key):
+            raise HTTPException(status_code=400, detail="La clave de Groq debe empezar por gsk_ (cópiala completa desde console.groq.com/keys).")
+        updates["GROQ_API_KEY"] = key
+    pwd = str(payload.get("panel_password") or "")
+    if pwd:
+        if len(pwd) < 8 or pwd.strip() != pwd:
+            raise HTTPException(status_code=400, detail="La clave del panel debe tener al menos 8 caracteres, sin espacios al inicio ni al final.")
+        updates["PANEL_PASSWORD"] = pwd
+    if not updates:
+        raise HTTPException(status_code=400, detail="No hay cambios para guardar.")
+    _write_env(updates)
+    if "GROQ_API_KEY" in updates:
+        ia_service.set_api_key(key)
+    if "PANEL_PASSWORD" in updates:
+        PANEL_PASSWORD = pwd
+    return {"ok": True, "saved": sorted(updates)}
 
 
 # ---- Contenido administrable ------------------------------------------------
@@ -356,4 +450,4 @@ def admin_export(name: str, _: bool = Depends(require_admin)):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT", "8000")), workers=1)
+    uvicorn.run("main:app", host=os.getenv("HOST", "0.0.0.0"), port=int(os.getenv("PORT", "8000")), workers=1)

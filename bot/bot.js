@@ -28,6 +28,11 @@ function start(client) {
     console.log(h ? `🧠 Servicio de IA conectado (${api.BASE_URL})` : `⚠️ El servicio de IA no responde en ${api.BASE_URL}. Inícialo con: cd ia && python main.py`)
   );
   contentSync.start();
+  // Latido para el panel: cada minuto informa si sigue conectado.
+  setInterval(async () => {
+    const ok = await client.isConnected().catch(() => false);
+    api.botStatus({ state: ok ? 'connected' : 'desconectado' });
+  }, 60000);
 
   client.onMessage((message) => {
     if (message.isGroupMsg || message.fromMe) return;
@@ -60,17 +65,35 @@ function start(client) {
   });
 }
 
+// En un servidor (Linux/ARM) se usa el Chromium del sistema: CHROME_PATH=/usr/bin/chromium
+const CHROME_PATH = process.env.CHROME_PATH || '';
+const serverMode = !!CHROME_PATH;
+
 wppconnect
   .create({
     session: 'compufacil-bot',
-    catchQR: (base64Qr, asciiQR) => {
+    catchQR: (base64Qr, asciiQR, attempt) => {
       console.log('Escanea el siguiente código QR con WhatsApp (Dispositivos vinculados):');
       console.log(asciiQR);
+      api.botStatus({ state: 'qr', qr: base64Qr, attempt });
     },
-    statusFind: (statusSession) => console.log('Estado de sesión:', statusSession),
+    statusFind: (statusSession) => {
+      console.log('Estado de sesión:', statusSession);
+      api.botStatus({ state: statusSession });
+    },
     headless: true,
     logQR: true,
+    // En el servidor se espera el QR sin límite: se escanea desde el panel.
     autoClose: 0,
+    ...(serverMode
+      ? { useChrome: false, useInsecureChromiumArgs: process.env.CHROME_NO_SANDBOX === '1', puppeteerOptions: { executablePath: CHROME_PATH } }
+      : {}),
   })
-  .then(start)
-  .catch((error) => console.error('Error al iniciar wppconnect:', error));
+  .then((client) => {
+    api.botStatus({ state: 'connected' });
+    start(client);
+  })
+  .catch((error) => {
+    console.error('Error al iniciar wppconnect:', error);
+    api.botStatus({ state: 'error', detail: String(error && error.message || error).slice(0, 200) });
+  });

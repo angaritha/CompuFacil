@@ -99,6 +99,18 @@
   #login .card { width: 100%; max-width: 380px; text-align: center; }
   #login input { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; margin: 14px 0 10px; background: var(--surface); color: var(--ink); }
   #login .err { color: var(--bad); font-size: 13px; min-height: 18px; }
+  .wa-status { display: flex; align-items: center; gap: 14px; padding: 12px 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .wa-status .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); flex: none; }
+  .wa-status.ok .dot { background: var(--good); } .wa-status.wait .dot { background: var(--warn); } .wa-status.bad .dot { background: var(--bad); }
+  .wa-status .txt { flex: 1; min-width: 200px; } .wa-status .txt small { display: block; color: var(--muted); font-size: 12px; }
+  .wa-qr { width: 100%; display: flex; gap: 18px; align-items: center; flex-wrap: wrap; padding-top: 6px; }
+  .wa-qr img { width: 230px; height: 230px; background: #fff; padding: 8px; border-radius: 10px; border: 1px solid var(--line); }
+  .wa-qr ol { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 14px; line-height: 1.7; }
+  .set-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .set-grid .card { display: grid; gap: 10px; align-content: start; }
+  .set-grid input { font: inherit; padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); width: 100%; }
+  .set-msg { font-size: 13px; min-height: 18px; }
+  .set-msg.err { color: var(--bad); } .set-msg.okmsg { color: var(--good); }
   [hidden] { display: none !important; }
   /* ---- Contenido administrable ---- */
   .subtabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
@@ -172,12 +184,14 @@
         <button data-view="videos">Videos</button>
         <button data-view="usuarios">Usuarios</button>
         <button data-view="contenido">Contenido del bot</button>
+        <button data-view="ajustes">Ajustes</button>
       </nav>
     </div>
   </header>
 
   <main class="wrap">
     <section class="view active" id="view-resumen">
+      <div class="card wa-status" id="wa-status" hidden></div>
       <div class="card ia-status" id="ia-status"><span class="dot"></span><div class="txt"><b>Revisando la IA…</b></div></div>
       <div class="grid kpis" id="kpis"></div>
       <div class="grid two">
@@ -242,6 +256,27 @@
       </div>
       <div id="ct-intro" class="muted" style="margin:-4px 0 12px;font-size:13px"></div>
       <div id="ct-body" class="ed-list"></div>
+    </section>
+
+    <section class="view" id="view-ajustes">
+      <div class="set-grid">
+        <div class="card">
+          <h2 style="margin:0">Clave de la IA (Groq)</h2>
+          <div class="muted" id="set-groq-state" style="font-size:13px">…</div>
+          <input id="set-groq" type="password" placeholder="gsk_…" autocomplete="off">
+          <div class="muted" style="font-size:12px">Créala gratis en <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a> y pégala aquí. Se guarda en el servidor y nunca se vuelve a mostrar.</div>
+          <div><button class="btn-primary" id="set-groq-btn">Guardar clave</button></div>
+          <div class="set-msg" id="set-groq-msg"></div>
+        </div>
+        <div class="card">
+          <h2 style="margin:0">Clave del panel</h2>
+          <div class="muted" id="set-pwd-state" style="font-size:13px"></div>
+          <input id="set-pwd1" type="password" placeholder="Nueva clave (mínimo 8 caracteres)" autocomplete="new-password">
+          <input id="set-pwd2" type="password" placeholder="Repite la nueva clave" autocomplete="new-password">
+          <div><button class="btn-primary" id="set-pwd-btn">Cambiar clave</button></div>
+          <div class="set-msg" id="set-pwd-msg"></div>
+        </div>
+      </div>
     </section>
   </main>
 </div>
@@ -695,6 +730,68 @@ $('#ct-body').addEventListener('toggle', (e) => {
 }, true);
 window.addEventListener('beforeunload', (e) => { if (Object.values(CT.dirty).some(Boolean)) { e.preventDefault(); e.returnValue = ''; } });
 
+// ---- WhatsApp: estado y QR para vincular ----
+let WA_TIMER = null;
+async function loadBotStatus() {
+  const box = $('#wa-status');
+  let st;
+  try { st = await api('/api/admin/bot'); } catch (_) { return; }
+  clearTimeout(WA_TIMER);
+  const s = st.state || 'desconocido';
+  const ok = ['connected', 'inChat', 'isLogged', 'qrReadSuccess', 'successChat'].includes(s);
+  if (ok && box.dataset.shown === 'ok') { WA_TIMER = setTimeout(loadBotStatus, 60000); return; }
+  box.hidden = false;
+  if (ok) {
+    box.className = 'card wa-status ok'; box.dataset.shown = 'ok';
+    box.innerHTML = '<span class="dot"></span><div class="txt"><b>WhatsApp conectado</b><small>El bot está recibiendo y respondiendo mensajes.</small></div>';
+    WA_TIMER = setTimeout(loadBotStatus, 60000);
+    return;
+  }
+  box.dataset.shown = s;
+  if (s === 'qr' && st.qr) {
+    box.className = 'card wa-status wait';
+    box.innerHTML = `<span class="dot"></span><div class="txt"><b>Vincula WhatsApp para encender el bot</b><small>El código se renueva solo cada pocos segundos.</small></div>
+      <div class="wa-qr"><img src="${esc(st.qr)}" alt="Código QR para vincular WhatsApp">
+      <ol><li>Abre WhatsApp en el celular del número del bot.</li><li>Toca <b>⋮ → Dispositivos vinculados → Vincular un dispositivo</b>.</li><li>Escanea este código.</li></ol></div>`;
+    WA_TIMER = setTimeout(loadBotStatus, 4000);
+    return;
+  }
+  const never = !st.updated;
+  box.className = 'card wa-status ' + (s === 'error' || s === 'browserClose' || s === 'desconectado' ? 'bad' : 'wait');
+  box.innerHTML = `<span class="dot"></span><div class="txt"><b>${never ? 'El bot de WhatsApp no ha reportado su estado' : 'WhatsApp: ' + esc(s)}</b><small>${never ? 'Revisa que el bot esté encendido.' : 'Conectando… esta tarjeta se actualiza sola.'}${st.detail ? ' · ' + esc(st.detail) : ''}</small></div>`;
+  WA_TIMER = setTimeout(loadBotStatus, 5000);
+}
+
+// ---- Ajustes ----
+async function loadSettings() {
+  try {
+    const st = await api('/api/admin/settings');
+    $('#set-groq-state').textContent = st.groq_configured ? `Hay una clave configurada (${st.groq_hint}). Pega otra solo si quieres cambiarla.` : 'No hay clave configurada: el tutor solo usa las respuestas sin IA.';
+    $('#set-pwd-state').textContent = st.panel_password_default ? 'Estás usando la clave por defecto. Si el panel está en internet, cámbiala.' : 'Clave personalizada.';
+  } catch (_) {}
+}
+async function saveSetting(body, msgEl) {
+  msgEl.className = 'set-msg'; msgEl.textContent = 'Guardando…';
+  const res = await fetch('/api/admin/settings', { method: 'POST', headers: { 'X-Panel-Key': KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const out = await res.json().catch(() => ({}));
+  if (!res.ok) { msgEl.className = 'set-msg err'; msgEl.textContent = out.detail || 'No se pudo guardar'; return false; }
+  msgEl.className = 'set-msg okmsg'; msgEl.textContent = '✓ Guardado';
+  return true;
+}
+$('#set-groq-btn').addEventListener('click', async () => {
+  const v = $('#set-groq').value.trim();
+  if (!v) return;
+  if (await saveSetting({ groq_api_key: v }, $('#set-groq-msg'))) { $('#set-groq').value = ''; loadSettings(); loadIaStatus(true); }
+});
+$('#set-pwd-btn').addEventListener('click', async () => {
+  const a = $('#set-pwd1').value, b = $('#set-pwd2').value;
+  if (a !== b) { $('#set-pwd-msg').className = 'set-msg err'; $('#set-pwd-msg').textContent = 'Las claves no coinciden.'; return; }
+  if (await saveSetting({ panel_password: a }, $('#set-pwd-msg'))) {
+    KEY = a; try { sessionStorage.setItem('cf_key', KEY); } catch (_) {}
+    $('#set-pwd1').value = ''; $('#set-pwd2').value = ''; renderExports(); loadSettings();
+  }
+});
+
 // ---- Eventos ----
 $('#tabs').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-view]');
@@ -732,6 +829,8 @@ async function enter() {
     renderExports();
     loadIaStatus();
     loadContent().catch(() => {});
+    loadBotStatus();
+    loadSettings();
     const tab = sessionStorage.getItem('cf_tab');
     if (tab) document.querySelector(`#tabs button[data-view="${tab}"]`)?.click();
     loadAll();

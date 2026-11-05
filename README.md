@@ -42,7 +42,7 @@ también administra los videos, las preguntas y las respuestas del bot.
   - *ACCESIBLE* y *NORMAL* activan o desactivan el modo accesible, que se recuerda por estudiante.
 
 ### 📊 Panel web para el docente
-Se abre en `http://localhost:8000/panel` y pide clave. Tiene estas pestañas:
+Se abre en `http://localhost:8000/panel` o en la dirección HTTPS del servidor, y pide clave. En *Resumen* muestra si WhatsApp está conectado y, si hace falta, el **QR para vincularlo**. Tiene estas pestañas:
 
 | Pestaña | Qué muestra |
 |---|---|
@@ -52,6 +52,7 @@ Se abre en `http://localhost:8000/panel` y pide clave. Tiene estas pestañas:
 | **Tutor IA** | Cada pregunta con su respuesta y su valoración 👍/👎; se puede filtrar por las que se respondieron sin IA. |
 | **Videos y Usuarios** | Reproducciones por video y actividad de cada estudiante. |
 | **Contenido del bot** 🆕 | El docente administra el contenido sin tocar código (ver la tabla siguiente). |
+| **Ajustes** 🆕 | Clave de la IA (Groq) y clave del panel, sin tocar archivos. |
 
 En **Contenido del bot** se puede:
 
@@ -86,6 +87,7 @@ CompuFacil/
 ├── iniciar_compufacil.bat   alternativa en dos ventanas
 ├── index.html, img/         página de presentación (GitHub Pages)
 ├── launcher/                código del lanzador (Go)
+├── deploy/oracle/           instalación en servidor (Oracle Cloud, 24/7)
 ├── ia/
 │   ├── main.py              API + panel
 │   ├── ia_service.py        Tutor IA (Groq), respuestas sin IA y estado del cupo
@@ -106,7 +108,7 @@ CompuFacil/
     └── test/                Simulaciones sin WhatsApp
 ```
 
-## Instalación (una sola vez)
+## Instalación local (Método 1, una sola vez)
 
 Requisitos:
 - **Node.js 18+**
@@ -128,7 +130,17 @@ npm install
 Crea `ia/.env` a partir de `ia/.env.example`. Allí pon tu `GROQ_API_KEY` y, si
 quieres, una `PANEL_PASSWORD` propia (por defecto `compu2026`).
 
-## Uso diario
+## Dos formas de ponerlo en marcha
+
+| | **Método 1 · En tu PC (local)** | **Método 2 · Servidor Oracle Cloud (24/7)** |
+|---|---|---|
+| Cuándo usarlo | Demostraciones y pruebas | Uso real con estudiantes |
+| Encendido | Mientras el PC esté prendido | Siempre, con reinicio automático |
+| Costo | Gratis | Gratis (Oracle *Always Free*) |
+| Panel | `http://localhost:8000/panel` | `https://<ip>.sslip.io/panel`, con HTTPS |
+| Vincular WhatsApp | QR en la ventana del lanzador | QR en el panel (*Resumen*) |
+
+### Método 1 · En tu PC (local)
 
 **Doble clic en `CompuFacil.exe`.** En una sola ventana:
 
@@ -147,6 +159,33 @@ quedan en `logs/`. La sesión de WhatsApp se guarda en `bot/tokens/`.
 cd ia && python main.py      # terminal 1
 cd bot && node bot.js        # terminal 2, cuando la anterior diga "Uvicorn running"
 ```
+
+### Método 2 · Servidor Oracle Cloud (24/7)
+
+El bot queda encendido todo el tiempo en una máquina gratuita de Oracle Cloud:
+Ubuntu, ARM, 2 núcleos y 12 GB de RAM. Un solo script instala todo. La guía
+paso a paso está en [`deploy/oracle/LEEME.md`](deploy/oracle/LEEME.md).
+
+1. Crea una cuenta en https://signup.cloud.oracle.com.
+2. Crea una instancia **Ubuntu 24.04** de tipo **VM.Standard.A1.Flex** (2 OCPU, 12 GB). En *Script de inicialización* pega:
+   ```bash
+   #!/bin/bash
+   curl -fsSL https://raw.githubusercontent.com/angaritha/CompuFacil/HEAD/deploy/oracle/install.sh | bash
+   ```
+3. En la red de la instancia (*Security List*), abre los puertos **80** y **443** (TCP).
+4. Espera unos 10 minutos y entra a `https://<ip-con-guiones>.sslip.io/panel`; por ejemplo, la IP `129.1.2.3` queda como `129-1-2-3.sslip.io`.
+5. En el panel:
+   - **Ajustes:** pega tu clave de Groq y cambia la clave del panel.
+   - **Resumen:** escanea el QR desde WhatsApp.
+
+**Cómo queda instalado:**
+- El bot y la IA corren como servicios (`compufacil-bot` y `compufacil-ia`) que se reinician solos si fallan o si la máquina se reinicia.
+- Solo el panel queda en internet, protegido con HTTPS (Caddy) y clave, con bloqueo tras varios intentos fallidos. La API del bot sigue siendo local.
+- Para actualizar con lo último de GitHub: `sudo compufacil-actualizar`. Conserva los datos, los videos y las claves.
+
+> Para el servidor conviene un **número de WhatsApp dedicado al bot**: el bot
+> usa WhatsApp Web (WPPConnect, no oficial) y desde un servidor en la nube el
+> riesgo de bloqueo es algo mayor.
 
 ### Cupo de la IA (Groq)
 
@@ -190,6 +229,8 @@ node test/sim_voice2.js       # audios y palabras aproximadas
 | El QR no aparece o expira | Cierra CompuFácil, borra `bot/tokens/` y vuelve a abrirlo. |
 | No llega el video | El MP4 debe pesar menos de 16 MB. Si pesa más, comprímelo o usa un enlace de YouTube en el panel. |
 | No llegan las notas de voz del bot | Vuelve a abrir `CompuFacil.exe`, que actualiza las dependencias, y revisa el internet. |
+| En el servidor no carga el panel | Revisa que los puertos 80 y 443 estén abiertos en la *Security List* de Oracle. El registro de la instalación está en `/var/log/compufacil-install.log`. |
+| En el servidor el bot no responde | `sudo systemctl status compufacil-bot` y `sudo journalctl -u compufacil-bot -n 50`. |
 | "Contenido del bot" aparece vacío | Enciende el bot una vez: carga los videos y preguntas de fábrica. |
 | Windows avisa "protegió su PC" | *Más información* → *Ejecutar de todas formas*. El .exe no está firmado digitalmente. |
 
