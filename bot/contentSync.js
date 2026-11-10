@@ -11,12 +11,15 @@ const content = require('./content');
 const INTERVAL_MS = Number(process.env.CONTENT_SYNC_MS || 20000);
 let version = null;
 let timer = null;
+let seeded = false;
 
 async function syncOnce() {
   let data = await api.content();
   if (!data) return false;
-  if (!data.videos || !data.quiz) {
-    await api.seedContent(content.DEFAULTS);
+  // Al arrancar se envían siempre los valores de fábrica: el servidor solo
+  // guarda lo que falta (y completa enlaces de video vacíos), nunca pisa el panel.
+  if (!seeded || !data.videos || !data.quiz) {
+    seeded = Boolean(await api.seedContent(content.DEFAULTS)) || seeded;
     data = await api.content();
     if (!data) return false;
   }

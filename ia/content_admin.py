@@ -219,7 +219,24 @@ def seed(payload: dict) -> dict:
                 continue
             # Conserva los ids originales del bot para no romper estadísticas.
             done[section] = db.set_content(section, clean, only_if_missing=True)
+            if section == "videos" and not done[section]:
+                done["video_urls"] = _fill_missing_urls(clean)
     return done
+
+
+def _fill_missing_urls(defaults: list[dict]) -> int:
+    """Completa el enlace de respaldo de los videos guardados que no lo tienen,
+    con el de fábrica del mismo id. Nunca reemplaza un enlace puesto en el panel."""
+    saved = db.get_content("videos") or []
+    by_id = {v["id"]: v.get("url") for v in defaults if v.get("url")}
+    filled = 0
+    for v in saved:
+        if not (v.get("url") or "").strip() and by_id.get(v.get("id")):
+            v["url"] = by_id[v["id"]]
+            filled += 1
+    if filled:
+        db.set_content("videos", saved)
+    return filled
 
 
 # ---------------------------------------------------------------------------

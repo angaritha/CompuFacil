@@ -28,7 +28,7 @@ const TUTORIALS = [
     id: 'cpu',
     title: 'El procesador (CPU)',
     file: 'assets/videos/01-cpu.mp4',
-    url: '',
+    url: 'https://youtu.be/bJrfPQJ_Ks4',
     points: [
       'Es el "cerebro": ejecuta las instrucciones de los programas.',
       'Su velocidad se mide en *GHz* y trabaja con varios *núcleos*.',
@@ -39,7 +39,7 @@ const TUTORIALS = [
     id: 'ram',
     title: 'La memoria RAM',
     file: 'assets/videos/02-ram.mp4',
-    url: '',
+    url: 'https://youtu.be/RZyd7Cww82k',
     points: [
       'Guarda *temporalmente* lo que estás usando en este momento.',
       'Es *volátil*: se borra al apagar el equipo.',
@@ -50,7 +50,7 @@ const TUTORIALS = [
     id: 'almacenamiento',
     title: 'Almacenamiento: HDD, SSD y NVMe',
     file: 'assets/videos/03-almacenamiento.mp4',
-    url: '',
+    url: 'https://youtu.be/mVLlPIyvxkY',
     points: [
       'Guarda tus archivos de forma *permanente*.',
       'El *HDD* es mecánico y económico; el *SSD* no tiene partes móviles y es mucho más rápido.',
@@ -61,7 +61,7 @@ const TUTORIALS = [
     id: 'placa',
     title: 'La placa madre',
     file: 'assets/videos/04-placa-madre.mp4',
-    url: '',
+    url: 'https://youtu.be/fLgumz2q6Cw',
     points: [
       'Es la tarjeta principal donde se conectan todos los componentes.',
       'Tiene el *socket* del CPU, las ranuras de RAM y los puertos.',
@@ -72,7 +72,7 @@ const TUTORIALS = [
     id: 'gpu',
     title: 'La tarjeta gráfica (GPU)',
     file: 'assets/videos/05-gpu.mp4',
-    url: '',
+    url: 'https://youtu.be/lSTKcpz6Ioo',
     points: [
       'Procesa imágenes, video y gráficos 3D.',
       'Puede ser *integrada* (en el procesador) o *dedicada* (tarjeta aparte).',
@@ -83,7 +83,7 @@ const TUTORIALS = [
     id: 'psu',
     title: 'La fuente de poder',
     file: 'assets/videos/06-fuente-de-poder.mp4',
-    url: '',
+    url: 'https://youtu.be/fBfd5dAMcCk',
     points: [
       'Convierte la corriente del tomacorriente en energía para los componentes.',
       'Su potencia se mide en *vatios (W)*.',
@@ -94,7 +94,7 @@ const TUTORIALS = [
     id: 'perifericos',
     title: 'Periféricos y puertos',
     file: 'assets/videos/07-perifericos.mp4',
-    url: '',
+    url: 'https://youtu.be/E1zPmR9YlCY',
     points: [
       'Hay periféricos de *entrada* (teclado), *salida* (monitor) y *entrada/salida* (USB).',
       'Se conectan por puertos como *USB*, *HDMI* o de audio.',
@@ -105,7 +105,7 @@ const TUTORIALS = [
     id: 'ensamble',
     title: 'Arma un PC paso a paso',
     file: 'assets/videos/08-ensamble.mp4',
-    url: '',
+    url: 'https://youtu.be/uUGI3Grx4qU',
     points: [
       'Descárgate de la estática antes de manipular componentes.',
       'Orden típico: CPU → RAM → placa en el chasis → almacenamiento → fuente → GPU.',
